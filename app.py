@@ -1,11 +1,15 @@
+import os
+
 from flask import Flask
 from flask_cors import CORS
+from dotenv import load_dotenv
 
 from external.routes import Routes
 
 
 def main() -> None:
      
+     load_dotenv()
      app = Flask(__name__)
      CORS(
           app=app, 
@@ -19,7 +23,7 @@ def main() -> None:
      app.run(
           debug=True,
           host="0.0.0.0",
-          port=5000
+          port=os.getenv("PORT")
      )
 
 if __name__ == "__main__":
