@@ -8,7 +8,7 @@ from contextlib import contextmanager
 
 load_dotenv()
 engine = create_engine(
-    os.getenv("DATABASE_URL"),
+    url=os.getenv("DATABASE_URL"),
     pool_pre_ping=True,
 )
 
@@ -23,7 +23,6 @@ def get_db_session():
     session = SessionLocal()
     try:
         yield session
-        session.commit()
     except Exception:
         session.rollback()
         raise
