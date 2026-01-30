@@ -4,7 +4,7 @@ from abc import (
     abstractmethod,
 )
 
-class ZapiService(ABC):
+class WhatsappService(ABC):
 
     @abstractmethod
     def send_text(

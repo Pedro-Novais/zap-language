@@ -35,4 +35,5 @@ class CreateUserInteractor:
             email=email,
             password_hash=password_hash,
         )
+        logger.info(f"User with email '{email}' created successfully")
         return

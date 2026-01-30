@@ -4,6 +4,7 @@ from loguru import logger
 from flask import Flask
 from flask_cors import CORS
 from dotenv import load_dotenv
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from external.routes import Routes
 
@@ -11,8 +12,12 @@ logger.remove()
 
 
 def main() -> None:
+    
     load_dotenv()
+    config_logger()
+    
     app = Flask(__name__)
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
     
     CORS(
         app=app, 
@@ -26,7 +31,7 @@ def main() -> None:
     routes.register_error_handlers()
     routes.build_routes()
     
-    port = int(os.getenv("PORT", 5000))
+    port = int(os.getenv("PORT"))
     app.run(
         debug=True,
         host="0.0.0.0",
@@ -43,6 +48,7 @@ def config_logger() -> None:
         logger.add("logs/local_debug.log", rotation="10 MB", retention="3 days")
     else:
         logger.add(sys.stdout, serialize=True)
+
 
 if __name__ == "__main__":     
     try:

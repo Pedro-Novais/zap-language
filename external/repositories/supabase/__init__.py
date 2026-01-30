@@ -1,1 +1,2 @@
 from .user_repository_impl import UserRepositoryImpl
+from .phone_verification_repository_impl import PhoneVerificationRepositoryImpl

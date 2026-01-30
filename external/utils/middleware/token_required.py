@@ -1,8 +1,7 @@
 import jwt
 import os
 from functools import wraps
-from flask import request, abort
-from dotenv import load_dotenv
+from flask import jsonify, make_response, request, abort
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 
 
@@ -10,25 +9,22 @@ def token_required(f):
     
     @wraps(f)
     def decorated(*args, **kwargs):
-        load_dotenv()
-        user_id = None
-        token = request.cookies.get('authToken')
-
+        token = request.cookies.get('authToken', None)
         if not token:
-            return abort(401)
+            return jsonify({"error": "Token ausente"}), 401
         
         try:
-            data = jwt.decode(token, os.getenv("SECRET_KEY"), algorithms=['HS256'])
+            data = jwt.decode(
+                jwt=token, 
+                key=os.getenv("TOKEN_SECRET_KEY"), 
+                algorithms=['HS256'],
+            )
             user_id = data['userId']
 
-        except ExpiredSignatureError:
-            return abort(401)
-        
-        except InvalidTokenError:
-            return abort(401)
-
-        except Exception:
-            return abort(401)
+        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError, Exception) as e:
+            response = make_response(jsonify({"error": "Sessão inválida", "reason": str(e)}), 401)
+            response.delete_cookie('authToken')
+            return response
     
         return f(user_id, *args, **kwargs)
     

@@ -29,3 +29,20 @@ class UserRepository(ABC):
     ) -> Optional[User]:
         
         raise NotImplementedError()
+    
+    @abstractmethod
+    def get_phone_number_by_user_id(
+        self, 
+        user_id: str,
+    ) -> Optional[str]:
+        
+        raise NotImplementedError()
+    
+    @abstractmethod
+    def insert_phone_number_by_user_id(
+        self, 
+        user_id: str,
+        phone_number: str,
+    ) -> None:
+        
+        raise NotImplementedError()

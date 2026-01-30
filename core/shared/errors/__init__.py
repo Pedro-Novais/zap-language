@@ -1,5 +1,15 @@
 from .custom_exceptions import (
     ApplicationError,
     EmailAlreadyExistsError,
-    MissingRequiredFieldError
+    MissingRequiredFieldError,
+    UserNotFoundError,
+    IncorrectPasswordProvidedError,
+    ErrorSendingMessageToWhatsapp,
+    ExternalServiceError,
+    InvalidPhoneNumberError,
+    InvalidVerificationCodeError,
+    UserAlreadyHasPhoneNumberError,
+    NoVerificationCodeWasGeneratedError,
+    MaxAttemptsReachedError,
+    CodeExpiredError,
 )

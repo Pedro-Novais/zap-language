@@ -42,3 +42,24 @@ class UserRepositoryImpl(UserRepository):
             user = session.query(User).filter(User.email == email).first()
             return user
         
+    def get_phone_number_by_user_id(
+        self, 
+        user_id: str,
+    ) -> Optional[str]:
+        
+        with get_db_session() as session:
+            user = session.query(User).filter(User.id == user_id).first()
+            return user.phone if user else None
+        
+    def insert_phone_number_by_user_id(
+        self, 
+        user_id: str,
+        phone_number: str,
+    ) -> None:
+        
+        with get_db_session() as session:
+            user = session.query(User).filter(User.id == user_id).first()
+            user.phone = phone_number
+            session.commit()
+            return
+        

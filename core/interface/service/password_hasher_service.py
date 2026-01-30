@@ -13,7 +13,7 @@ class PasswordHasherService(ABC):
     @abstractmethod
     def verify(
         self,
-        password: str,
-        password_hash: str,
+        password_sended: str,
+        password_saved: str,
     ) -> bool:
         pass

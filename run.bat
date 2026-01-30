@@ -11,3 +11,4 @@ python -m external.database.scripts.create_tables
 
 echo Subindo aplicacao...
 python app.py
+pause

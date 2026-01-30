@@ -1,16 +1,14 @@
 import os
 import requests
 import logging
-from dotenv import load_dotenv
 
-from core.interface.service import ZapiService
+from core.interface.service import WhatsappService
+from core.shared.errors import ErrorSendingMessageToWhatsapp
 
 logger = logging.getLogger(__name__)
 
-load_dotenv()
 
-
-class ZApiService(ZapiService):
+class ZApiService(WhatsappService):
     
     ZAPI_BASE_URL = "https://api.z-api.io/instances/{ZAPI_INSTANCE_ID}/token/{ZAPI_TOKEN}"
     
@@ -37,9 +35,14 @@ class ZApiService(ZapiService):
         }
 
         try:
-            response = requests.post(f"{self.zapi_base_url}/send-text", json=payload, headers=self.headers)
+            response = requests.post(
+                url=f"{self.zapi_base_url}/send-text", 
+                json=payload, 
+                headers=self.headers,
+            )
             response.raise_for_status()
             logger.info(f"Message sent to {phone}")
             
         except Exception as e:
             logger.error(f"Error sending message via Z-API: {e}")
+            raise ErrorSendingMessageToWhatsapp(error=e)

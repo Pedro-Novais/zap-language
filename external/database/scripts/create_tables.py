@@ -9,6 +9,7 @@ from external.database.models import StudySettings
 from external.database.models import Plan
 from external.database.models import Subscription
 from external.database.models import MessageHistory
+from external.database.models import PhoneVerification
 
 
 def create_tables():

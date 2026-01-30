@@ -3,7 +3,7 @@ import logging
 from core.interactor.conversation import PROMPT_MAP
 from core.interface.service import (
     AITutorService,
-    ZapiService,
+    WhatsappService,
 )
 from core.interface.repository import UserRepository
 
@@ -16,13 +16,13 @@ class ConversationManager:
         self,
         user_repository: UserRepository, 
         ai_tutor_service: AITutorService, 
-        zapi_service: ZapiService,
+        whatsapp_service: WhatsappService,
     ) -> None:
         
         self.user_repository = user_repository
         # self.history_repo = history_repo
         self.ai_tutor_service = ai_tutor_service
-        self.zapi_service = zapi_service
+        self.whatsapp_service = whatsapp_service
 
     def process_and_respond(
         self, 

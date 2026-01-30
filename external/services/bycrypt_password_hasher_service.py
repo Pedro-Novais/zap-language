@@ -17,11 +17,11 @@ class BcryptPasswordHasherService(PasswordHasherService):
 
     def verify(
         self, 
-        password: str, 
-        password_hash: str,
+        password_sended: str,
+        password_saved: str,
     ) -> bool:
         
         return bcrypt.checkpw(
-            password.encode(),
-            password_hash.encode()
+            password_sended.encode(),
+            password_saved.encode()
         )

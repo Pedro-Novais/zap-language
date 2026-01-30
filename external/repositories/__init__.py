@@ -1,1 +1,4 @@
-from .supabase import UserRepositoryImpl
+from .supabase import (
+    UserRepositoryImpl,
+    PhoneVerificationRepositoryImpl,
+)

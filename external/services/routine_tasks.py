@@ -19,7 +19,7 @@ ai_tutor_service = AITutorService()
 manager = ConversationManager(
     user_repository=user_repository, 
     ai_tutor_service=ai_tutor_service, 
-    zapi_service=zapi_service,
+    whatsapp_service=zapi_service,
 )
 
 logger = logging.getLogger("WorkerService")
@@ -42,19 +42,6 @@ def message_processing_task(
             phone=phone, 
             message_text=user_message,
         )
-        # zapi = ZApiService()
-        # ai_tutor = AITutorService()
-        
-        # prompt = PROMPT_MAP[1].format(message_text=user_message)
-        # response = ai_tutor.get_tutor_response(
-        #     history=[],
-        #     message=prompt,
-        # )
-        
-        # zapi.send_text(
-        #     phone="5511967599269", 
-        #     message=response,
-        # )
 
     except Exception as e:
         logger.error(f"❌ Erro: {e}")
