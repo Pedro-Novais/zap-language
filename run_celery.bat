@@ -3,5 +3,5 @@ echo Ativando ambiente virtual...
 call venv\Scripts\activate
 
 echo Rodando worker...
-celery -A run_worker.celery worker --loglevel=info --pool=solo
+call celery -A run_worker.celery worker --loglevel=info --pool=solo
 pause

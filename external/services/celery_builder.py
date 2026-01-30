@@ -1,8 +1,11 @@
 import os
 from celery import Celery
+import redis
 from dotenv import load_dotenv
 
 load_dotenv()
+
+redis_client = redis.from_url(os.getenv('REDIS_URL', 'redis://localhost:6379/0'), decode_responses=True)
 
 def make_celery():
     redis_url = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
