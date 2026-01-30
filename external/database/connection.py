@@ -1,14 +1,18 @@
 import os
 
-from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import (
+    IntegrityError,
+    OperationalError,
+)
 from contextlib import contextmanager
 
+from core.shared.errors import ExternalServiceError
 
-load_dotenv()
+
 engine = create_engine(
-    os.getenv("DATABASE_URL"),
+    url=os.getenv("DATABASE_URL"),
     pool_pre_ping=True,
 )
 
@@ -23,9 +27,8 @@ def get_db_session():
     session = SessionLocal()
     try:
         yield session
-        session.commit()
-    except Exception:
+    except OperationalError as e:
         session.rollback()
-        raise
+        raise ExternalServiceError(error=e)
     finally:
         session.close()
