@@ -11,3 +11,4 @@ celery
 redis
 loguru
 pydantic
+Flask-Migrate

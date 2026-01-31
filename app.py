@@ -1,23 +1,37 @@
 import sys
 import os
+
 from loguru import logger
 from flask import Flask
 from flask_cors import CORS
 from dotenv import load_dotenv
 from werkzeug.middleware.proxy_fix import ProxyFix
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 from external.routes import Routes
+from external.database.models import(
+    StudySettings,
+    User,
+    PhoneVerification,
+    Subscription,
+    Plan,
+    MessageHistory,
+)
 
 logger.remove()
+load_dotenv()
 
 
-def main() -> None:
-    
-    load_dotenv()
+app = Flask(__name__)
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
+def create_app():
     config_logger()
-    
-    app = Flask(__name__)
-    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
     
     CORS(
         app=app, 
@@ -31,12 +45,7 @@ def main() -> None:
     routes.register_error_handlers()
     routes.build_routes()
     
-    port = int(os.getenv("PORT"))
-    app.run(
-        debug=True,
-        host="0.0.0.0",
-        port=port
-    )
+    return app
 
 def config_logger() -> None:
     if os.getenv("ENV") != "production":
@@ -52,6 +61,8 @@ def config_logger() -> None:
 
 if __name__ == "__main__":     
     try:
-        main()
+        application = create_app()
+        port = int(os.getenv("PORT", 5000))
+        application.run(debug=True, host="0.0.0.0", port=port)
     except Exception as e:
         print(f"Erro ao inicializar: {e}")

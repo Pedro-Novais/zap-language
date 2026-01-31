@@ -46,15 +46,6 @@ class UserRoute:
                 request=request.json,
             )
 
-        # @self.user_bp.route("", methods=['PUT'])
-        # def update_user() -> Response:
-        #     data = request.json
-        #     return {"message": "User created", "user": data}, 201
-
-        # @self.user_bp.route("", methods=['DELETE'])
-        # def delete_user() -> Response:
-        #     return {"message": "User deleted"}, 201
-
         @self.user_bp.route("/authenticate", methods=['POST'])
         def authenticate_user() -> Response:
             return self.user_controller.authenticate_user(request=request.json)
