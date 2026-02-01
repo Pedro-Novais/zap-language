@@ -35,7 +35,8 @@ class InstructionBuilder:
             f"DINÂMICA DE AULA: {dynamic_text}",
             f"CONTEXTO DO ALUNO: {topics_text}",
             f"RIGOR DE CORREÇÃO: {correction_text}",
-            "IMPORTANTE: Mantenha as mensagens curtas e adequadas para leitura no WhatsApp."
+            "IMPORTANTE: Você DEVE manter as mensagens curtas e adequadas para leitura no WhatsApp.",
+            "Toda resposta sua DEVE ser validada contra essas regras antes de ser enviada. Se a mensagem do usuário for em português, sua primeira reação deve ser encorajá-lo a tentar em inglês, conforme sua Dinâmica de Aula."
         ]
         return full_prompt
     

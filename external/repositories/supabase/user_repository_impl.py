@@ -86,18 +86,21 @@ class UserRepositoryImpl(UserRepository):
             return None
     
         study_settings = user.study_settings
-        study_settings_model = StudySettingsModel(
-            id=study_settings.id,
-            user_id=study_settings.user_id,
-            persona_type=study_settings.persona_type,
-            correction_level=study_settings.correction_level,
-            preferred_topics=study_settings.preferred_topics,
-            language_ratio=study_settings.language_ratio,
-            language_dynamics=study_settings.language_dynamics,
-            receive_newsletters=study_settings.receive_newsletters,
-            preferred_language=study_settings.preferred_language,
-            created_at=study_settings.created_at,
-        )
+        study_settings_model = None
+        if study_settings:
+            study_settings_model = StudySettingsModel(
+                id=study_settings.id,
+                user_id=study_settings.user_id,
+                persona_type=study_settings.persona_type,
+                correction_level=study_settings.correction_level,
+                preferred_topics=study_settings.preferred_topics,
+                language_ratio=study_settings.language_ratio,
+                language_dynamics=study_settings.language_dynamics,
+                receive_newsletters=study_settings.receive_newsletters,
+                preferred_language=study_settings.preferred_language,
+                created_at=study_settings.created_at,
+            )
+            
         return UserModel(
             id=user.id,
             email=user.email,
@@ -106,5 +109,6 @@ class UserRepositoryImpl(UserRepository):
             whatsapp_enabled=user.whatsapp_enabled,
             created_at=user.created_at,
             study_settings=study_settings_model,
+            password=user.password,
         )
         

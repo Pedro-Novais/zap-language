@@ -18,6 +18,8 @@ class ConversationManager:
     KEY_PROCESSING = "processing:{phone}"
     KEY_BAN = "blacklist:{phone}"
     KEY_RATE_LIMIT = "rate_limit:{phone}"
+    
+    KEY_AI_HEALTH = "ai:health:status"
 
     def __init__(
         self,
@@ -49,9 +51,17 @@ class ConversationManager:
         
         if not self._is_allowed(phone=phone):
             return
-
+        
         key_processing = self._get_key_processing(phone=phone)
         key_ban = self._get_key_ban(phone=phone)
+        
+        if not self._is_ai_healthy():
+            self.whatsapp_service.send_text(
+                phone=phone, 
+                message="🤖 Minha inteligência está processando muitas informações agora. "
+                        "Poderia me enviar essa mensagem novamente em 2 minutinhos?"
+            )
+            return
         
         self.redis.setex(key_processing, 30, "true")
 
@@ -60,12 +70,20 @@ class ConversationManager:
             if not user or not user.whatsapp_enabled:
                 logger.error(f"User not registered, adding to blacklist: {phone}")
                 self.redis.setex(key_ban, self.BAN_TIME_SECONDS * 10, "true")
+                self.whatsapp_service.send_text(
+                    phone=phone, 
+                    message="Para utilização desse serviço, é necessário habilitar nosso plano de estudo de idiomas."
+                )
                 return
 
             instruction = self.instruction_builder.build(user=user)
             if not instruction:
                 logger.error(f"Instruction not found, adding to blacklist: {phone}")
                 self.redis.setex(key_ban, self.BAN_TIME_SECONDS, "true")
+                self.whatsapp_service.send_text(
+                    phone=phone, 
+                    message="Para utilização desse serviço, é necessário habilitar nosso plano de estudo de idiomas."
+                )
                 return
             
             history = self.message_history_manager.get_message_history(user_id=user.id)
@@ -126,6 +144,9 @@ class ConversationManager:
             return False
 
         return True
+    
+    def _is_ai_healthy(self) -> bool:
+        return not self.redis.exists(self.KEY_AI_HEALTH)
     
     def _get_key_processing(
         self, 

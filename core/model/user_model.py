@@ -17,6 +17,7 @@ class UserModel(BaseModel):
     whatsapp_enabled: bool
     created_at: datetime
     study_settings: Optional[StudySettingsModel] = None
+    password: str
     
     @field_validator("created_at", mode="after")
     @classmethod
