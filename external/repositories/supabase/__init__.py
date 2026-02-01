@@ -1,2 +1,4 @@
 from .user_repository_impl import UserRepositoryImpl
 from .phone_verification_repository_impl import PhoneVerificationRepositoryImpl
+from .user_settings_repository_impl import StudySettingsRepositoryImpl
+from .message_history_repository_impl import MessageHistoryRepositoryImpl

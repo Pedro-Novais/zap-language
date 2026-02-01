@@ -4,10 +4,10 @@ from datetime import (
     timezone,
 )
 from sqlalchemy import (
-    String, 
     DateTime, 
     ForeignKey, 
     Text,
+    Enum,
 )
 from sqlalchemy.orm import (
     Mapped, 
@@ -17,7 +17,7 @@ from sqlalchemy.orm import (
 from sqlalchemy.dialects.postgresql import UUID
 
 from external.database.base import Base
-from core.model import MessageRoleModel
+from core.model.enum import MessageRoleModel
 
 
 class MessageHistory(Base):
@@ -32,7 +32,7 @@ class MessageHistory(Base):
         ForeignKey("users.id", ondelete="CASCADE"), 
         nullable=False
     )
-    role: Mapped[str] = mapped_column(String(20), default=MessageRoleModel.USER.value)
+    role: Mapped[MessageRoleModel] = mapped_column(Enum(MessageRoleModel), default=MessageRoleModel.USER)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime,

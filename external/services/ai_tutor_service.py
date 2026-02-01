@@ -1,13 +1,24 @@
-from typing import List, Dict, Optional
+from typing import (
+    List, 
+    Optional,
+)
 
+from loguru import logger
 from google import genai
-from google.genai.types import HttpOptions, Content, GenerateContentConfig, Part
+from google.genai.types import (
+    HttpOptions, 
+    Content, 
+    GenerateContentConfig,
+    Part,
+)
 
 from core.interface.service import AITutorService
+from core.model import MessageHistoryModel
+
 
 class AITutorService(AITutorService):
     
-    def __init__(self):
+    def __init__(self) -> None:
         
         self.client = genai.Client(
             http_options=HttpOptions(
@@ -16,45 +27,65 @@ class AITutorService(AITutorService):
                 },
             )
         )
-        
         self.model_id = "gemini-2.0-flash-lite" 
 
     def get_tutor_response(
         self,
-        instruction: str, 
-        history: Optional[List[Dict[str, any]]],
         message: str,
+        instruction: str, 
+        history: Optional[List[MessageHistoryModel]],
     ) -> str:
         
         try:
-            # 1. Montamos o conteúdo atual + histórico
-            # O histórico deve vir antes da mensagem atual
-            contents = []
-            if history:
-                for item in history:
-                    contents.append(Content(
-                        role=item['role'],
-                        parts=[Part(text=item['parts'][0] if isinstance(item['parts'], list) else item['parts'])]
-                    ))
-            
-            contents.append(Content(role="user", parts=[Part(text=message)]))
-
+            logger.info("Getting tutor response...")
+            contents = self._build_content_messages(
+                message=message,
+                history=history,
+            )
+            config = self._build_content_configs(
+                system_instruction=instruction,
+            )
+            logger.info("Sending request to motor de IA...")
             response = self.client.models.generate_content(
                 model=self.model_id,
-                contents=message,
-                config=GenerateContentConfig(
-                    system_instruction=instruction
-                )
+                contents=contents,
+                config=config
             )
             
             return response.text
         
         except Exception as e:
-            print(f"Erro no motor de IA: {e}")
+            logger.error(f"Error getting tutor response: {e}")
             return "I'm having a little brain fog today. Can you repeat? 🍎"
+    
+    @staticmethod
+    def _build_content_messages(
+        message: str,
+        history: Optional[List[MessageHistoryModel]],
+    ) -> Content:
         
-
-
-            # response = self.client.models.generate_content(
-            #     model=self.model_id,
-            #     contents=message,
+        logger.info("Building content messages...")
+        contents = []
+        if history:
+            for item in history:
+                content = Content(
+                    role=item.role,
+                    parts=[Part(text=item.content)]
+                )
+                contents.append(content)
+            
+        contents.append(Content(role="user", parts=[Part(text=message)]))
+        return contents
+    
+    @staticmethod
+    def _build_content_configs(
+        system_instruction: str
+    ) -> Content:
+        
+        logger.info("Building content configs...")
+        config = GenerateContentConfig(
+            system_instruction=system_instruction
+        )
+            
+        return config
+        

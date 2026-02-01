@@ -12,4 +12,5 @@ from .custom_exceptions import (
     NoVerificationCodeWasGeneratedError,
     MaxAttemptsReachedError,
     CodeExpiredError,
+    UnhandledConfigurationValueError,
 )

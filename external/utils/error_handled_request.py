@@ -15,8 +15,9 @@ def register_error_handlers(
         error: ApplicationError,
     ) -> Tuple[dict, int]:
         
-        response = jsonify({"messageError": error.message_error})
+        data = {"messageError": error.message_error}
         if error.extra:
-            response.json.update(error.extra)
+            # data.update(error.extra)
+            pass
             
-        return response, error.status_code
+        return jsonify(data), error.status_code

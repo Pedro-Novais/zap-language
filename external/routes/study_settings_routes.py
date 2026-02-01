@@ -25,9 +25,12 @@ class StudySettingsRoute:
         self,
     ) -> None:
 
-        @self.user_bp.route("", methods=['POST'])
+        @self.study_settings_bp.route("", methods=['POST'])
         @token_required
-        def create_study_teacher() -> Response:
-            return self.study_settings_controller.create_study_teacher(request=request.json)
+        def create_study_teacher(user_id: str) -> Response:
+            return self.study_settings_controller.create_study_teacher(
+                user_id=user_id,                
+                request=request.json,
+            )
         
         self.app.register_blueprint(blueprint=self.study_settings_bp)

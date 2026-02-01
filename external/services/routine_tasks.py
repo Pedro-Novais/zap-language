@@ -1,28 +1,46 @@
-import logging
-from external.repositories import UserRepositoryImpl
+from loguru import logger
+
+from external.repositories import (
+    UserRepositoryImpl,
+    MessageHistoryRepositoryImpl,
+)
 from external.services import (
     celery,
+    redis_client,
     ZApiService,
     AITutorService,
 )
-from core.interactor.conversation import PROMPT_MAP
 from core.manager import ConversationManager
+from core.manager.message_history_manager import MessageHistoryManager
+from core.manager.user_manager import UserManager
 
-logger = logging.getLogger("WorkerService")
 
+def _builder_manager() -> ConversationManager:
+    
+    user_repository = UserRepositoryImpl()
+    history_repo = MessageHistoryRepositoryImpl()
+    
+    message_history_manager = MessageHistoryManager(
+        redis_client=redis_client,
+        history_repository=history_repo,
+    )
+    user_manager = UserManager(
+        redis_client=redis_client,
+        user_repository=user_repository,
+    )
+    
+    zapi_service = ZApiService()
+    ai_tutor_service = AITutorService()
+    
+    return ConversationManager(
+        user_manager=user_manager,
+        message_history_manager=message_history_manager,
+        ai_tutor_service=ai_tutor_service, 
+        whatsapp_service=zapi_service,
+        redis_client=redis_client,
+    )
 
-user_repository = UserRepositoryImpl()
-# history_repo = MessageHistoryRepositoryImpl()
-zapi_service = ZApiService()
-ai_tutor_service = AITutorService()
-
-manager = ConversationManager(
-    user_repository=user_repository, 
-    ai_tutor_service=ai_tutor_service, 
-    whatsapp_service=zapi_service,
-)
-
-logger = logging.getLogger("WorkerService")
+manager = _builder_manager()
 
 
 @celery.task(
