@@ -18,6 +18,7 @@ class UserModel(BaseModel):
     created_at: datetime
     study_settings: Optional[StudySettingsModel] = None
     password: str
+    current_topic: str | None = None
     
     @field_validator("created_at", mode="after")
     @classmethod

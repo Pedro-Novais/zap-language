@@ -2,10 +2,10 @@ import redis
 
 from loguru import logger
 
-
 from core.manager.message_history_manager import MessageHistoryManager
 from core.manager.user_manager import UserManager
 from core.manager.builder import InstructionBuilder
+from core.manager.key import RedisKeyManager
 from core.interface.service import (
     AITutorService,
     WhatsappService,
@@ -14,12 +14,6 @@ from core.shared.errors import ErrorSendingMessageToWhatsapp
 
 
 class ConversationManager:
-    
-    KEY_PROCESSING = "processing:{phone}"
-    KEY_BAN = "blacklist:{phone}"
-    KEY_RATE_LIMIT = "rate_limit:{phone}"
-    
-    KEY_AI_HEALTH = "ai:health:status"
 
     def __init__(
         self,
@@ -52,9 +46,6 @@ class ConversationManager:
         if not self._is_allowed(phone=phone):
             return
         
-        key_processing = self._get_key_processing(phone=phone)
-        key_ban = self._get_key_ban(phone=phone)
-        
         if not self._is_ai_healthy():
             self.whatsapp_service.send_text(
                 phone=phone, 
@@ -62,10 +53,27 @@ class ConversationManager:
                         "Poderia me enviar essa mensagem novamente em 2 minutinhos?"
             )
             return
-        
-        self.redis.setex(key_processing, 30, "true")
 
+        self._invalidate_cache_if_user_has_been_modified(phone=phone)
+        self._process_request(
+            phone=phone, 
+            message_text=message_text,
+        )
+    
+    def _process_request(
+        self, 
+        phone: str, 
+        message_text: str,
+    ) -> None:
+        
+        key_processing = self._get_key_processing(phone=phone)
+        key_ban = self._get_key_ban(phone=phone)
         try:
+            self.redis.setex(
+                name=key_processing, 
+                time=30, 
+                value="true",
+            )
             user = self.user_manager.get_study_settings_by_phone(phone=phone)
             if not user or not user.whatsapp_enabled:
                 logger.error(f"User not registered, adding to blacklist: {phone}")
@@ -86,7 +94,10 @@ class ConversationManager:
                 )
                 return
             
-            history = self.message_history_manager.get_message_history(user_id=user.id)
+            history = self.message_history_manager.get_message_history(
+                user_id=user.id,
+                phone=phone,
+            )
             message_tutor = self.ai_tutor_service.get_tutor_response(
                 instruction=instruction,
                 history=history,
@@ -94,6 +105,7 @@ class ConversationManager:
             )
             self.message_history_manager.save_messages(
                 user_id=user.id,
+                phone=phone,
                 user_message=message_text,
                 tutor_message=message_tutor,
             )
@@ -112,7 +124,7 @@ class ConversationManager:
         
         finally:
             self.redis.delete(key_processing)
-            
+    
     def _is_allowed(
         self, 
         phone: str,
@@ -146,26 +158,35 @@ class ConversationManager:
         return True
     
     def _is_ai_healthy(self) -> bool:
-        return not self.redis.exists(self.KEY_AI_HEALTH)
+        return not self.redis.exists(RedisKeyManager.ai_health_status())
     
+    def _invalidate_cache_if_user_has_been_modified(
+        self, 
+        phone: str,
+    ) -> None:
+        
+        key_update_user = RedisKeyManager.update_user_profile(phone=phone)
+        if self.redis.exists(key_update_user):
+            self.message_history_manager.remove_user_message_from_cache(phone=phone)
+            self.message_history_manager.clear_history_for_user(phone=phone)
+            self.user_manager.invalidate_user_cache(phone=phone)
+            self.redis.delete(key_update_user)
+    
+    @staticmethod
     def _get_key_processing(
-        self, 
         phone: str,
     ) -> str:
-        
-        return self.KEY_PROCESSING.format(phone=phone)
+        return RedisKeyManager.processing_phone(phone=phone)
     
+    @staticmethod
     def _get_key_ban(
-        self, 
         phone: str,
     ) -> str:
-        
-        return self.KEY_BAN.format(phone=phone)
+        return RedisKeyManager.black_list_phone(phone=phone)
     
+    @staticmethod
     def _get_key_rate_limit(
-        self, 
         phone: str,
     ) -> str:
-        
-        return self.KEY_RATE_LIMIT.format(phone=phone)
+        return RedisKeyManager.rate_limit_phone(phone=phone)
     

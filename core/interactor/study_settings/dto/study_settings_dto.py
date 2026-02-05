@@ -6,6 +6,7 @@ from typing import Optional, List
 @dataclass
 class StudySettingsDTO:
     user_id: uuid.UUID
+    study_id: Optional[uuid.UUID] = None
     id: Optional[uuid.UUID] = None
     persona_type: Optional[str] = None
     correction_level: Optional[int] = None

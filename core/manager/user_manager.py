@@ -1,4 +1,3 @@
-import json
 import redis
 from typing import Optional
 
@@ -6,11 +5,11 @@ from loguru import logger
 
 from core.interface.repository import UserRepository
 from core.model import UserModel
+from core.manager.key import RedisKeyManager
 
 
 class UserManager:
-    
-    KEY_USER_PROFILE = "user:profile:{phone}"
+
     
     def __init__(
         self, 
@@ -38,7 +37,6 @@ class UserManager:
 
         logger.info(f"👤 Cache Miss para perfil de {phone}. Buscando no banco...")
         user_data = self.user_repository.get_user_by_phone_number(phone=phone)
-        
         if not user_data:
             logger.info(f"👤 Usuário não encontrado para {phone}")
             return None
@@ -46,16 +44,24 @@ class UserManager:
         self.redis.setex(key, self.TTL, user_data.model_dump_json())
         return user_data
 
-    def invalidate_cache(
+    def invalidate_user_cache(
         self, 
         phone: str,
     ) -> None:
         
-        self.redis.delete(f"user:profile:{phone}")
+        key = self._get_key_user_profile(phone=phone)
+        self.redis.delete(key)
         
+    @staticmethod
     def _get_key_user_profile(
-        self, 
         phone: str,
     ) -> str:
         
-        return self.KEY_USER_PROFILE.format(phone=phone)
+        return RedisKeyManager.user_profile(phone=phone)
+    
+    @staticmethod
+    def _get_key_update_user_profile(
+        phone: str,
+    ) -> str:
+        
+        return RedisKeyManager.update_user_profile(phone=phone)

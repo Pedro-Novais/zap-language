@@ -8,6 +8,8 @@ from sqlalchemy import (
     ForeignKey, 
     Text,
     Enum,
+    Boolean,
+    text,
 )
 from sqlalchemy.orm import (
     Mapped, 
@@ -34,6 +36,13 @@ class MessageHistory(Base):
     )
     role: Mapped[MessageRoleModel] = mapped_column(Enum(MessageRoleModel), default=MessageRoleModel.USER)
     content: Mapped[str] = mapped_column(Text, nullable=False)
+    is_allowed: Mapped[bool] = mapped_column(
+        Boolean, 
+        default=True, 
+        index=True,
+        server_default=text('true'),
+        nullable=False,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         default=lambda: datetime.now(timezone.utc),

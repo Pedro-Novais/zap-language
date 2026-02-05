@@ -1,1 +1,1 @@
-from .create_study_settings_interactor import StudySettingsInteractor
+from .study_settings_interactor import StudySettingsInteractor

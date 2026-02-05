@@ -6,3 +6,4 @@ from .celery_builder import (
     redis_client,
 )
 from .z_api_service import ZApiService
+from .event_publisher_service import EventPublisherServiceImpl

@@ -34,10 +34,11 @@ class StudySettingsRepository(ABC):
     def update(
         self,
         user_id: str,
-        persona_type: TeacherPersonaType,
-        correction_level: TeacherCorrectionLevel,
-        preferred_topics: List[str],
-        language_dynamics: TeacherLanguageDynamics,
+        study_id: str,
+        persona_type: TeacherPersonaType | None,
+        correction_level: TeacherCorrectionLevel | None,
+        preferred_topics: List[str] | None,
+        language_dynamics: TeacherLanguageDynamics | None,
     ) -> None:
         
         raise NotImplementedError()

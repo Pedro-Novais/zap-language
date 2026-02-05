@@ -3,8 +3,17 @@ from typing import (
     Optional,
 )
 
+from datetime import (
+    datetime, 
+    timedelta,
+    timezone,
+)
+
 from external.database.connection import get_db_session
-from external.database.models import MessageHistory
+from external.database.models import (
+    User,
+    MessageHistory, 
+)
 from core.interface.repository import MessageHistoryRepository
 from core.model import MessageHistoryModel
 
@@ -15,22 +24,20 @@ class MessageHistoryRepositoryImpl(MessageHistoryRepository):
         self,
         user_id: str,
         limit: int,
+        messages_from_the_last_hours: int = 5,
     ) -> List[MessageHistoryModel]:
         
+        time_threshold = datetime.now(tz=timezone.utc) - timedelta(hours=messages_from_the_last_hours)
         with get_db_session() as session:
             messages = session.query(MessageHistory).filter(
                 MessageHistory.user_id == user_id,
+                MessageHistory.is_allowed == True,
+                MessageHistory.created_at >= time_threshold,
             ).order_by(MessageHistory.created_at.desc()).limit(limit).all()
             
             response = []
             for message in messages:
-                response.append(MessageHistoryModel(
-                    id=message.id,
-                    user_id=message.user_id,
-                    role=message.role,
-                    content=message.content,
-                    created_at=message.created_at,
-                ))
+                response.append(self._transform_message_data_in_message_model(message=message))
             
             return response
 
@@ -56,11 +63,30 @@ class MessageHistoryRepositoryImpl(MessageHistoryRepository):
             for db_msg in message_db_instances:
                 session.refresh(db_msg)
             
-            return [
-                self._transform_message_data_in_message_model(db_msg) 
-                for db_msg in message_db_instances
-            ]
+            return [self._transform_message_data_in_message_model(message=db_msg) for db_msg in message_db_instances]
         
+    def invalidate_messages(
+        self,
+        phone: str,
+    ) -> None:
+        
+        with get_db_session() as session:
+            user_id_subquery = (
+                session.query(User.id)
+                .filter(User.phone == phone)
+                .scalar_subquery()
+            )
+            session.query(MessageHistory).filter(
+                MessageHistory.user_id == user_id_subquery,
+                MessageHistory.is_allowed == True
+            ).update(
+                {"is_allowed": False}, 
+                synchronize_session=False
+            )
+            
+            session.commit()
+            return
+    
     @staticmethod
     def _transform_message_data_in_message_model(
         message: Optional[MessageHistory],

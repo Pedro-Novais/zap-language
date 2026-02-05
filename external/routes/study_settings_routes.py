@@ -33,4 +33,12 @@ class StudySettingsRoute:
                 request=request.json,
             )
         
+        @self.study_settings_bp.route("", methods=['PATCH'])
+        @token_required
+        def update_study_teacher(user_id: str) -> Response:
+            return self.study_settings_controller.update_study_teacher(
+                user_id=user_id,                
+                request=request.json,
+            )
+        
         self.app.register_blueprint(blueprint=self.study_settings_bp)

@@ -14,6 +14,7 @@ class MessageHistoryRepository(ABC):
         self,
         user_id: str,
         limit: int,
+        messages_from_the_last_hours: int = 5,
     ) -> List[MessageHistoryModel]:
         
         raise NotImplementedError()
@@ -24,5 +25,13 @@ class MessageHistoryRepository(ABC):
         user_id: str,
         messages: List[MessageHistoryModel],
     ) -> List[MessageHistoryModel]:
+        
+        raise NotImplementedError()
+    
+    @abstractmethod
+    def invalidate_messages(
+        self,
+        phone: str,
+    ) -> None:
         
         raise NotImplementedError()

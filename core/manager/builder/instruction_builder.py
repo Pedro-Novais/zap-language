@@ -22,21 +22,22 @@ class InstructionBuilder:
         settings = user.study_settings
         if not settings:
             return None
-
+        
+        current_topic = user.current_topic if user.current_topic else "Assuntos Gerais"
+        
         persona_text = settings.persona_type.get_instruction_by_persona_type()
         dynamic_text = settings.language_dynamics.get_language_dynamics_instruction()
-        topics = ", ".join(settings.preferred_topics) if settings.preferred_topics else "assuntos gerais"
-        topics_text = f"Sempre que possível, direcione a conversa para os interesses do aluno: {topics}."
-        correction_text = f"O nível de rigor com erros gramaticais deve ser de {settings.correction_level} baseado em uma escala máxima de 3."
         
         full_prompt = [
             self.base_instruction,
-            f"DIRETRIZ DE PERSONALIDADE: {persona_text}",
-            f"DINÂMICA DE AULA: {dynamic_text}",
-            f"CONTEXTO DO ALUNO: {topics_text}",
-            f"RIGOR DE CORREÇÃO: {correction_text}",
-            "IMPORTANTE: Você DEVE manter as mensagens curtas e adequadas para leitura no WhatsApp.",
-            "Toda resposta sua DEVE ser validada contra essas regras antes de ser enviada. Se a mensagem do usuário for em português, sua primeira reação deve ser encorajá-lo a tentar em inglês, conforme sua Dinâmica de Aula."
+            f"### PERFIL DO TUTOR\n{persona_text}",
+            f"### MÉTODO DE ENSINO\n{dynamic_text}",
+            f"### TÓPICO DA CONVERSA\nAssunto: {current_topic}. ",
+            f"### RIGOR GRAMATICAL\nNível {settings.correction_level}/3. (1: Apenas erros fatais, 2: Erros comuns, 3: Rigor absoluto em gramática e pontuação).",
+            "### REGRAS DE OURO (WHATSAPP)\n"
+            "- Respostas curtas e escaneáveis (máx 3 parágrafos).\n"
+            "- Use negrito para destacar palavras novas em inglês.\n"
+            "- Se o aluno usar português, aplique sua Dinâmica de Aula imediatamente."
         ]
         return full_prompt
     

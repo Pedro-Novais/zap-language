@@ -20,6 +20,7 @@ class MessageHistoryModel(BaseModel):
     user_id: UUID
     role: MessageRoleModel
     content: str
+    is_allowed: bool = True
     id: Optional[UUID] = None
     created_at: Optional[datetime] = None
     

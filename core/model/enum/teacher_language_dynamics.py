@@ -7,21 +7,22 @@ class TeacherLanguageDynamics(StrEnum):
     SUPPORT = "support"
     
     def get_language_dynamics_instruction(self) -> str:
+        
         match self:
             case TeacherLanguageDynamics.IMMERSION:
                 return (
-                    "Fale 100% em inglês. Se o usuário falar em português, não responda em português; "
-                    "em vez disso, reescreva a dúvida dele em inglês e responda em inglês para forçar a imersão."
+                    "PROIBIDO usar português. Se o usuário falar em português, sua resposta deve ser: "
+                    "1. Traduzir o que ele disse para o inglês entre aspas. 2. Responder à pergunta dele 100% em inglês."
                 )
             case TeacherLanguageDynamics.BILINGUE:
                 return (
-                    "Para cada mensagem enviada, forneça primeiro o texto em inglês e, logo abaixo, "
-                    "a tradução literal ou contextual para o português entre parênteses ou em um novo parágrafo."
+                    "Padrão de resposta: [Texto em Inglês] seguido de [Tradução em Português em itálico]. "
+                    "Garanta que o aluno veja a tradução de cada frase importante para acelerar a compreensão."
                 )
             case TeacherLanguageDynamics.SUPPORT:
                 return (
-                    "O idioma principal da conversa é o inglês. No entanto, se você precisar explicar "
-                    "regras gramaticais complexas, gírias ou erros do usuário, use o português para garantir o entendimento."
+                    "Idioma principal: Inglês. Use o português EXCLUSIVAMENTE para explicar erros gramaticais complexos, "
+                    "nuances culturais ou quando o aluno demonstrar confusão total."
                 )
             case _:
-                return "Mantenha uma conversa equilibrada entre inglês e português."
+                return "Alterne entre inglês e português conforme a necessidade da conversa."
