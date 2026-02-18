@@ -47,11 +47,11 @@ class ConversationManager:
             return
         
         if not self._is_ai_healthy():
-            self.whatsapp_service.send_text(
-                phone=phone, 
-                message="🤖 Minha inteligência está processando muitas informações agora. "
-                        "Poderia me enviar essa mensagem novamente em 2 minutinhos?"
-            )
+            # self.whatsapp_service.send_text(
+            #     phone=phone, 
+            #     message="🤖 Minha inteligência está processando muitas informações agora. "
+            #             "Poderia me enviar essa mensagem novamente em 2 minutinhos?"
+            # )
             return
 
         self._invalidate_cache_if_user_has_been_modified(phone=phone)
@@ -87,7 +87,7 @@ class ConversationManager:
             instruction = self.instruction_builder.build(user=user)
             if not instruction:
                 logger.error(f"Instruction not found, adding to blacklist: {phone}")
-                self.redis.setex(key_ban, self.BAN_TIME_SECONDS, "true")
+                self.redis.setex(key_ban, 10, "true")
                 self.whatsapp_service.send_text(
                     phone=phone, 
                     message="Para utilização desse serviço, é necessário habilitar nosso plano de estudo de idiomas."

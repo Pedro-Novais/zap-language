@@ -1,8 +1,9 @@
+from threading import Thread
+
 from flask import (
     Flask,
     Blueprint,
     request,
-    Request,
     Response,
     jsonify
 )
@@ -50,7 +51,6 @@ class ZapiRoute:
         
         @self.zapi_bp.route("", methods=['POST'])
         def receive_message_external() -> Response:
-            
             data = request.json
             if not data or 'text' not in data:
                 return jsonify({"status": "ignored"}), 200
@@ -62,11 +62,12 @@ class ZapiRoute:
             message = data['text'].get('message', None)
 
             if phone and message:
-                task = message_processing_task.delay(
-                    phone=phone,
-                    user_message=message,
+                thread = Thread(
+                    target=message_processing_task,
+                    args=(phone, message)
                 )
-                return jsonify({"status": "queued", "id": task.id}), 200
+                thread.start()
+                return jsonify({"status": "queued"}), 200
             
             return jsonify({"status": "error"}), 400
         

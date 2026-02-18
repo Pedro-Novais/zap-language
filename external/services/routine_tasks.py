@@ -5,7 +5,6 @@ from external.repositories import (
     MessageHistoryRepositoryImpl,
 )
 from external.services import (
-    celery,
     redis_client,
     ZApiService,
     AITutorService,
@@ -43,14 +42,9 @@ def _builder_manager() -> ConversationManager:
 manager = _builder_manager()
 
 
-@celery.task(
-    bind=True, 
-    max_retries=3,
-)
 def message_processing_task(
-    self,
     phone: str, 
-    user_message: str,
+    message: str,
 ) -> None:
     
     logger.info(f"🔨 [Worker] Processando para {phone}")
@@ -58,9 +52,8 @@ def message_processing_task(
     try:
         manager.process_and_respond(
             phone=phone, 
-            message_text=user_message,
+            message_text=message,
         )
 
     except Exception as e:
         logger.error(f"❌ Erro: {e}")
-        self.retry(exc=e, countdown=5)

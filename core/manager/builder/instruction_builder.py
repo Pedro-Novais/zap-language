@@ -12,6 +12,8 @@ class InstructionBuilder:
         self.base_instruction = (
             "Você é um tutor de inglês especializado em conversação via WhatsApp. "
             "Seu objetivo é ajudar o aluno a praticar de forma natural e eficiente."
+            "Sempre responda ao comentário/pergunta do aluno primeiro para manter a conversa fluindo. Deixe as correções gramaticais para o final da mensagem, de forma sutil."
+            "Respostas curtas e escaneáveis (máx 3 parágrafos)."
         )
 
     def build(
@@ -27,17 +29,14 @@ class InstructionBuilder:
         
         persona_text = settings.persona_type.get_instruction_by_persona_type()
         dynamic_text = settings.language_dynamics.get_language_dynamics_instruction()
+        gramamatical_rigor = settings.correction_level.get_correction_instruction()
         
         full_prompt = [
             self.base_instruction,
             f"### PERFIL DO TUTOR\n{persona_text}",
             f"### MÉTODO DE ENSINO\n{dynamic_text}",
-            f"### TÓPICO DA CONVERSA\nAssunto: {current_topic}. ",
-            f"### RIGOR GRAMATICAL\nNível {settings.correction_level}/3. (1: Apenas erros fatais, 2: Erros comuns, 3: Rigor absoluto em gramática e pontuação).",
-            "### REGRAS DE OURO (WHATSAPP)\n"
-            "- Respostas curtas e escaneáveis (máx 3 parágrafos).\n"
-            "- Use negrito para destacar palavras novas em inglês.\n"
-            "- Se o aluno usar português, aplique sua Dinâmica de Aula imediatamente."
+            f"### RIGOR GRAMATICAL\n{gramamatical_rigor}",
+            f"### TÓPICO DA CONVERSA\nAssunto: {current_topic}. "
         ]
         return full_prompt
     

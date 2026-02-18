@@ -33,7 +33,7 @@ class MessageHistoryRepositoryImpl(MessageHistoryRepository):
                 MessageHistory.user_id == user_id,
                 MessageHistory.is_allowed == True,
                 MessageHistory.created_at >= time_threshold,
-            ).order_by(MessageHistory.created_at.desc()).limit(limit).all()
+            ).order_by(MessageHistory.created_at.asc()).limit(limit).all()
             
             response = []
             for message in messages:
