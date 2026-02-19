@@ -18,8 +18,7 @@ COPY . .
 
 RUN echo '#!/bin/bash\n\
 flask db upgrade\n\
-celery -A external.services.celery worker --loglevel=info --pool=solo &\n\
-gunicorn --bind 0.0.0.0:$PORT app:app' > /app/start.sh
+gunicorn --bind 0.0.0.0:$PORT "app:create_app()"
 
 RUN chmod +x /app/start.sh
 
