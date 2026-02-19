@@ -16,11 +16,4 @@ RUN pip install --no-cache-dir gunicorn
 
 COPY . .
 
-RUN echo '#!/bin/bash\n\
-flask db upgrade\n\
-gunicorn --bind 0.0.0.0:$PORT "app:create_app()"
-
-RUN chmod +x /app/start.sh
-
-# 8. Comando de entrada
-CMD ["/app/start.sh"]
+CMD gunicorn --bind 0.0.0.0:$PORT "app:create_app()"
