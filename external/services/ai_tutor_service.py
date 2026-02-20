@@ -16,6 +16,7 @@ from google.genai.types import (
 from core.interface.service import AITutorService
 from core.model import MessageHistoryModel
 from core.model.enum import MessageRoleModel
+from core.shared.errors import AiWithQuotaLimitReachedError
 
 
 class AITutorService(AITutorService):
@@ -61,7 +62,7 @@ class AITutorService(AITutorService):
             error_msg = str(e).upper()
             if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg:
                 logger.error(f"🚨 Limite de quota atingido no Gemini: {e}")
-                raise e
+                raise AiWithQuotaLimitReachedError()
             
             logger.error(f"Error getting tutor response: {e}")
             return "I'm having a little brain fog today. Can you repeat? 🍎"

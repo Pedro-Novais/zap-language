@@ -1,3 +1,6 @@
+from time import time
+from typing import List
+
 import redis
 
 from loguru import logger
@@ -10,7 +13,11 @@ from core.interface.service import (
     AITutorService,
     WhatsappService,
 )
-from core.shared.errors import ErrorSendingMessageToWhatsapp
+from core.model.message_history_model import MessageHistoryModel
+from core.shared.errors import (
+    ErrorSendingMessageToWhatsapp,
+    AiWithQuotaLimitReachedError,
+)
 
 
 class ConversationManager:
@@ -47,11 +54,11 @@ class ConversationManager:
             return
         
         if not self._is_ai_healthy():
-            # self.whatsapp_service.send_text(
-            #     phone=phone, 
-            #     message="🤖 Minha inteligência está processando muitas informações agora. "
-            #             "Poderia me enviar essa mensagem novamente em 2 minutinhos?"
-            # )
+            self.whatsapp_service.send_text(
+                phone=phone, 
+                message="🤖 Minha inteligência está processando muitas informações agora. "
+                        "Poderia me enviar essa mensagem novamente em 2 minutinhos?"
+            )
             return
 
         self._invalidate_cache_if_user_has_been_modified(phone=phone)
@@ -72,12 +79,12 @@ class ConversationManager:
             self.redis.setex(
                 name=key_processing, 
                 time=30, 
-                value="true",
+                value="1",
             )
             user = self.user_manager.get_study_settings_by_phone(phone=phone)
             if not user or not user.whatsapp_enabled:
                 logger.error(f"User not registered, adding to blacklist: {phone}")
-                self.redis.setex(key_ban, self.BAN_TIME_SECONDS * 10, "true")
+                self.redis.setex(key_ban, self.BAN_TIME_SECONDS, "1")
                 self.whatsapp_service.send_text(
                     phone=phone, 
                     message="Para utilização desse serviço, é necessário habilitar nosso plano de estudo de idiomas."
@@ -87,7 +94,7 @@ class ConversationManager:
             instruction = self.instruction_builder.build(user=user)
             if not instruction:
                 logger.error(f"Instruction not found, adding to blacklist: {phone}")
-                self.redis.setex(key_ban, 10, "true")
+                self.redis.setex(key_ban, self.BAN_TIME_SECONDS, "1")
                 self.whatsapp_service.send_text(
                     phone=phone, 
                     message="Para utilização desse serviço, é necessário habilitar nosso plano de estudo de idiomas."
@@ -98,7 +105,7 @@ class ConversationManager:
                 user_id=user.id,
                 phone=phone,
             )
-            message_tutor = self.ai_tutor_service.get_tutor_response(
+            message_tutor = self._get_tutor_response(
                 instruction=instruction,
                 history=history,
                 message=message_text,
@@ -114,16 +121,38 @@ class ConversationManager:
                 message=message_tutor,
             )
 
+        except AiWithQuotaLimitReachedError:
+            self.whatsapp_service.send_text(
+                phone=phone, 
+                message="🚨 Ops! Parece que estamos com muitas mensagens para responder no momento. "
+                        "Estamos trabalhando para resolver isso o mais rápido possível. "
+                        "Por favor, tente enviar sua mensagem novamente em alguns minutos. Agradecemos pela compreensão!"
+            )
+            self.redis.setex(RedisKeyManager.ai_health_status(), 60, "1")
+            
         except ErrorSendingMessageToWhatsapp as e:
             logger.error("Error sending message to Whatsapp", exc_info=True)
-            return
 
         except Exception as e:
             logger.error(f"Error processing message: {e}", exc_info=True)
-            return
         
         finally:
             self.redis.delete(key_processing)
+    
+    def _get_tutor_response(
+        self,
+        instruction: str,
+        history: List[MessageHistoryModel],
+        message: str,
+    ) -> str:
+        
+        tutor_response = self.ai_tutor_service.get_tutor_response(
+            instruction=instruction,
+            history=history,
+            message=message,
+        )
+        self.redis.setex(RedisKeyManager.ai_health_status(), 10, "1")
+        return tutor_response
     
     def _is_allowed(
         self, 
@@ -144,7 +173,7 @@ class ConversationManager:
 
         current_count = self.redis.incr(key_rate_limit)
         if current_count == 1:
-            self.redis.expire(key_rate_limit, 60)
+            self.redis.expire(key_rate_limit, 20)
 
         if current_count > self.MAX_MESSAGES_WINDOW:
             logger.error(f"🚨 [Ban] Usuário {phone} excedeu limite e foi para blacklist.")
@@ -158,7 +187,16 @@ class ConversationManager:
         return True
     
     def _is_ai_healthy(self) -> bool:
-        return not self.redis.exists(RedisKeyManager.ai_health_status())
+        
+        for attempt in range(3):
+            if not self.redis.exists(RedisKeyManager.ai_health_status()):
+                return True
+            
+            logger.warning(f"🤖 [AI] Tentativa {attempt + 1}: AI está ocupada. Verificando novamente em 5 segundos...")
+            time.sleep(10)
+        
+        logger.error("🤖 [AI] AI continua ocupada após 3 tentativas. Retornando erro para o usuário.")
+        return False
     
     def _invalidate_cache_if_user_has_been_modified(
         self, 

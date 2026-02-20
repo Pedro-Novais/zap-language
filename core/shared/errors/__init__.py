@@ -13,4 +13,5 @@ from .custom_exceptions import (
     MaxAttemptsReachedError,
     CodeExpiredError,
     UnhandledConfigurationValueError,
+    AiWithQuotaLimitReachedError,
 )

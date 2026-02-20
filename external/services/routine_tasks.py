@@ -1,3 +1,5 @@
+from threading import Lock
+
 from loguru import logger
 
 from external.repositories import (
@@ -12,6 +14,8 @@ from external.services import (
 from core.manager import ConversationManager
 from core.manager.message_history_manager import MessageHistoryManager
 from core.manager.user_manager import UserManager
+
+_ai_lock = Lock()
 
 
 def _builder_manager() -> ConversationManager:
@@ -47,13 +51,13 @@ def message_processing_task(
     message: str,
 ) -> None:
     
-    logger.info(f"🔨 [Worker] Processando para {phone}")
-    
-    try:
-        manager.process_and_respond(
-            phone=phone, 
-            message_text=message,
-        )
+    with _ai_lock:
+        try:
+            logger.info(f"🔨 [Worker] Processando para {phone}")
+            manager.process_and_respond(
+                phone=phone, 
+                message_text=message,
+            )
 
-    except Exception as e:
-        logger.error(f"❌ Erro: {e}")
+        except Exception as e:
+            logger.error(f"Error processing message from number {phone}, erro: {e}")
