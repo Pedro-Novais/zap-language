@@ -69,7 +69,7 @@ class ConversationWorker:
             self._handle_error(
                 phone=phone, 
                 message=message, 
-                error=e,
+                error=ex,
             )
             raise ex
         
