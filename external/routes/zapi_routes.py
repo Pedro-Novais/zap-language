@@ -86,7 +86,7 @@ class ZapiRoute:
     ) -> None:
 
         logger.info(f"📥 Recebida mensagem de {phone} via ZAPI. Adicionando à fila de processamento.")
-        payload = self.create_payload_to_queue(
+        payload = create_payload_to_queue(
             phone=phone, 
             message_text=message_text,
         )

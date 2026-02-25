@@ -2,7 +2,6 @@ from datetime import datetime, timezone
 from typing import Dict, Union
 
 def create_payload_to_queue(
-        self,
         phone: str,
         message_text: str,
         attempt: int = 0,
