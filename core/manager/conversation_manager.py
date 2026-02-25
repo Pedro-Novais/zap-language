@@ -5,7 +5,7 @@ from typing import Dict, List, Union
 import redis
 from loguru import logger
 
-from external.utils import create_payload_to_queue
+from external.utils.create_payload import create_payload_to_queue
 from core.manager.message_history_manager import MessageHistoryManager
 from core.manager.user_manager import UserManager
 from core.manager.builder import InstructionBuilder
