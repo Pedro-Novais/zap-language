@@ -49,7 +49,7 @@ class ConversationManager:
         phone: str, 
     ) -> bool:
 
-        if not self._is_allowed(phone=phone) or not self._is_ai_healthy():
+        if not self._is_allowed(phone=phone):
             return False
 
         self._invalidate_cache_if_user_has_been_modified(phone=phone)
@@ -200,18 +200,6 @@ class ConversationManager:
             return False
 
         return True
-
-    def _is_ai_healthy(self) -> bool:
-
-        for attempt in range(3):
-            if not self.redis.exists(RedisKeyManager.ai_health_status()):
-                return True
-
-            logger.warning(f"🤖 [AI] Tentativa {attempt + 1}: AI está ocupada. Verificando novamente em 5 segundos...")
-            time.sleep(10)
-
-        logger.error("🤖 [AI] AI continua ocupada após 3 tentativas. Retornando erro para o usuário.")
-        return False
 
     def _invalidate_cache_if_user_has_been_modified(
         self, 

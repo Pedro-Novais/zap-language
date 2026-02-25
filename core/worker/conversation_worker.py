@@ -36,7 +36,7 @@ class ConversationWorker:
                 
             except Exception as e:
                 logger.error(f"💥 Erro crítico no loop do Worker: {e}")
-                time.sleep(seconds=self.time_to_sleep_on_error)
+                time.sleep(self.time_to_sleep_on_error)
 
     def _process_message(
         self, 
@@ -78,7 +78,7 @@ class ConversationWorker:
     ) -> None:
         
         logger.error(f"❌ Erro ao processar mensagem de {phone}: {error}")
-        payload = self.manager._create_payload_to_queue(
+        payload = self.manager.create_payload_to_queue(
             phone=phone, 
             message_text=message,
         )

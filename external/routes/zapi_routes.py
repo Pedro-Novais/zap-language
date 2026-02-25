@@ -1,6 +1,7 @@
-import time
 import json
 from typing import Dict, Union
+
+from loguru import logger
 
 from flask import (
     Flask,
@@ -11,7 +12,6 @@ from flask import (
 )
 
 from external.controllers.zapi_controller import ZapiController
-from external.services.routine_tasks import message_processing_task
 from external.services.redis_client import redis_client
 
 from core.manager.key import RedisKeyManager
@@ -84,6 +84,7 @@ class ZapiRoute:
         message_text: str,
     ) -> None:
 
+        logger.info(f"📥 Recebida mensagem de {phone} via ZAPI. Adicionando à fila de processamento.")
         payload = self.create_payload_to_queue(
             phone=phone, 
             message_text=message_text,
