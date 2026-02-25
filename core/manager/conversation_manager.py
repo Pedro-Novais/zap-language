@@ -5,6 +5,7 @@ from typing import Dict, List, Union
 import redis
 from loguru import logger
 
+from external.utils import create_payload_to_queue
 from core.manager.message_history_manager import MessageHistoryManager
 from core.manager.user_manager import UserManager
 from core.manager.builder import InstructionBuilder
@@ -61,7 +62,7 @@ class ConversationManager:
         message_text: str,
     ) -> None:
 
-        payload = self.create_payload_to_queue(
+        payload = create_payload_to_queue(
             phone=phone, 
             message_text=message_text,
         )
@@ -71,21 +72,7 @@ class ConversationManager:
         except Exception as e:
             logger.error(f"❌ Erro ao enfileirar mensagem para {phone}: {e}")
 
-    def create_payload_to_queue(
-        self,
-        phone: str,
-        message_text: str,
-        attempt: int = 0,
-    ) -> Dict[str, Union[str, int]]:
-
-        return {
-            "phone": phone,
-            "message": message_text,
-            "attempt": attempt,
-            "timestamp": str(time())
-        }
-
-    def process_request(
+    def reply_user(
         self, 
         phone: str, 
         message_text: str,

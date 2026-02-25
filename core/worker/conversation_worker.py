@@ -7,7 +7,8 @@ from loguru import logger
 
 from core.manager.conversation_manager import ConversationManager
 from core.manager.key.redis_key_manager import RedisKeyManager
-from core.shared.errors import AiWithQuotaLimitReachedError
+from external.utils import create_payload_to_queue
+from core.shared.errors import ApplicationError
 
 
 class ConversationWorker:
@@ -34,8 +35,8 @@ class ConversationWorker:
                 data = json.loads(data_json)
                 self._process_message(data=data)
                 
-            except Exception as e:
-                logger.error(f"💥 Erro crítico no loop do Worker: {e}")
+            except ApplicationError as e:
+                logger.error(f"Turning off worker for {self.time_to_sleep_on_error} seconds due to application error: {e}")
                 time.sleep(self.time_to_sleep_on_error)
 
     def _process_message(
@@ -57,15 +58,23 @@ class ConversationWorker:
                 logger.warning(f"⚠️ Mensagem de {phone} não processada devido a restrições ou saúde da IA.")
                 return
             
-            self.manager.process_request(phone=phone, message_text=message)
+            self.manager.reply_user(
+                phone=phone, 
+                message_text=message,
+            )
             self.attempt_errors = 0
-            
-        except Exception as e:
+        
+        except ApplicationError as ex:
+            logger.error(f"⚠️ Erro de aplicação ao processar mensagem de {phone}: {ex}")
             self._handle_error(
                 phone=phone, 
                 message=message, 
                 error=e,
             )
+            raise ex
+        
+        except Exception as ex:
+            logger.error(f"💥 Erro crítico ao processar mensagem de {phone}: {ex}")
             
         finally:
             self._update_time_to_sleep_on_error()
@@ -78,7 +87,7 @@ class ConversationWorker:
     ) -> None:
         
         logger.error(f"❌ Erro ao processar mensagem de {phone}: {error}")
-        payload = self.manager.create_payload_to_queue(
+        payload = create_payload_to_queue(
             phone=phone, 
             message_text=message,
         )

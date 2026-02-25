@@ -13,6 +13,7 @@ from flask import (
 
 from external.controllers.zapi_controller import ZapiController
 from external.services.redis_client import redis_client
+from external.utils.create_payload import create_payload_to_queue
 
 from core.manager.key import RedisKeyManager
 
@@ -93,16 +94,3 @@ class ZapiRoute:
             redis_client.lpush(RedisKeyManager.queue_whatasapp_messages(), json.dumps(payload))
         except Exception as e:
             pass
-
-    def create_payload_to_queue(
-        self,
-        phone: str,
-        message_text: str,
-        attempt: int = 0,
-    ) -> Dict[str, Union[str, int]]:
-
-        return {
-            "phone": phone,
-            "message": message_text,
-            "attempt": attempt,
-        }
