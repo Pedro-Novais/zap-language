@@ -1,5 +1,6 @@
 import sys
 import os
+from threading import Thread
 
 from loguru import logger
 from flask import Flask
@@ -17,11 +18,13 @@ from external.database.models import(
     Subscription,
     Plan,
     MessageHistory,
+    SystemConfig,
 )
+from external.services.routine_tasks import worker
 
 logger.remove()
 load_dotenv()
-
+env_production = os.getenv("ENV") == "production"
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
@@ -48,7 +51,7 @@ def create_app():
     return app
 
 def config_logger() -> None:
-    if os.getenv("ENV") != "production":
+    if not env_production:
         logger.add(
             sys.stderr, 
             format="<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{message}</cyan>",
@@ -63,6 +66,6 @@ if __name__ == "__main__":
     try:
         application = create_app()
         port = int(os.getenv("PORT", 5000))
-        application.run(debug=True, host="0.0.0.0", port=port)
+        application.run(debug=not env_production, host="0.0.0.0", port=port, use_reloader=False)
     except Exception as e:
         print(f"Erro ao inicializar: {e}")

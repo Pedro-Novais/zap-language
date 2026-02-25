@@ -1,4 +1,6 @@
-from threading import Thread
+import time
+import json
+from typing import Dict, Union
 
 from flask import (
     Flask,
@@ -10,6 +12,9 @@ from flask import (
 
 from external.controllers.zapi_controller import ZapiController
 from external.services.routine_tasks import message_processing_task
+from external.services.redis_client import redis_client
+
+from core.manager.key import RedisKeyManager
 
 
 class ZapiRoute:
@@ -62,14 +67,41 @@ class ZapiRoute:
             message = data['text'].get('message', None)
 
             if phone and message:
-                thread = Thread(
-                    target=message_processing_task,
-                    args=(phone, message)
+                self.add_message_to_queue(
+                    phone=phone, 
+                    message_text=message,
                 )
-                thread.start()
                 return jsonify({"status": "queued"}), 200
             
             return jsonify({"status": "error"}), 400
         
 
         self.app.register_blueprint(self.zapi_bp)
+        
+    def add_message_to_queue(
+        self, 
+        phone: str, 
+        message_text: str,
+    ) -> None:
+
+        payload = self.create_payload_to_queue(
+            phone=phone, 
+            message_text=message_text,
+        )
+        try:
+            redis_client.lpush(RedisKeyManager.queue_whatasapp_messages(), json.dumps(payload))
+        except Exception as e:
+            pass
+
+    def create_payload_to_queue(
+        self,
+        phone: str,
+        message_text: str,
+        attempt: int = 0,
+    ) -> Dict[str, Union[str, int]]:
+
+        return {
+            "phone": phone,
+            "message": message_text,
+            "attempt": attempt,
+        }

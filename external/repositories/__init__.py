@@ -3,4 +3,5 @@ from .supabase import (
     PhoneVerificationRepositoryImpl,
     StudySettingsRepositoryImpl,
     MessageHistoryRepositoryImpl,
+    SystemConfigRepositoryImpl,
 )

@@ -73,7 +73,6 @@ class AITutorService(AITutorService):
         history: Optional[List[MessageHistoryModel]],
     ) -> Content:
         
-        logger.info("Building content messages...")
         contents = []
         if history:
             for item in history:
@@ -92,7 +91,6 @@ class AITutorService(AITutorService):
         system_instruction: str
     ) -> Content:
         
-        logger.info("Building content configs...")
         config = GenerateContentConfig(
             system_instruction=system_instruction
         )

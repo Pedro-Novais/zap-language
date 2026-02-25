@@ -7,12 +7,9 @@ from core.interface.service import IDProtectorService
 
 class FernetIDProtectorServiceImpl(IDProtectorService):
     
-    def __init__(self):
-        key = os.getenv("ID_ENCRYPTION_KEY")
-        
-        if not key:
-            key = Fernet.generate_key().decode()
-            
+    def __init__(self) -> None:
+    
+        key = os.getenv("ID_ENCRYPTION_KEY")       
         self.cipher = Fernet(key.encode())
 
     def encrypt(
@@ -33,3 +30,4 @@ class FernetIDProtectorServiceImpl(IDProtectorService):
             return self.cipher.decrypt(encrypted_id.encode()).decode()
         except Exception:
             raise ValueError("ID de configuração inválido ou expirado.")
+        

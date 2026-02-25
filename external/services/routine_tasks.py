@@ -1,5 +1,3 @@
-from threading import Lock
-
 from loguru import logger
 
 from external.repositories import (
@@ -14,8 +12,8 @@ from external.services import (
 from core.manager import ConversationManager
 from core.manager.message_history_manager import MessageHistoryManager
 from core.manager.user_manager import UserManager
-
-_ai_lock = Lock()
+from core.worker import ConversationWorker
+from external.services import redis_client
 
 
 def _builder_manager() -> ConversationManager:
@@ -44,6 +42,10 @@ def _builder_manager() -> ConversationManager:
     )
 
 manager = _builder_manager()
+worker = ConversationWorker(
+    redis_client=redis_client,
+    conversation_manager=manager,
+)
 
 
 def message_processing_task(
@@ -51,13 +53,14 @@ def message_processing_task(
     message: str,
 ) -> None:
     
-    with _ai_lock:
-        try:
-            logger.info(f"🔨 [Worker] Processando para {phone}")
-            manager.process_and_respond(
+    try:
+        logger.info(f"🔨 [Worker] Processando para {phone}")
+        message_processed = manager.process_message(phone=phone)
+        if message_processed:
+            manager.add_message_to_queue(
                 phone=phone, 
                 message_text=message,
             )
 
-        except Exception as e:
-            logger.error(f"Error processing message from number {phone}, erro: {e}")
+    except Exception as e:
+        logger.error(f"Error processing message from number {phone}, erro: {e}")

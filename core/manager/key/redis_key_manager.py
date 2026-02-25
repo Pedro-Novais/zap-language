@@ -49,4 +49,10 @@ class RedisKeyManager:
         phone: str,
     ) -> str:
         return f"{cls.PREFIX}:profile:update:{phone}"
+
+    @classmethod
+    def queue_whatasapp_messages(
+        cls, 
+    ) -> str:
+        return f"{cls.PREFIX}:queue:whatsapp_messages"
     
