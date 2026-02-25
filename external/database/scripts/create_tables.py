@@ -10,6 +10,7 @@ from external.database.models import Plan
 from external.database.models import Subscription
 from external.database.models import MessageHistory
 from external.database.models import PhoneVerification
+from external.database.models import SystemConfig
 
 
 def create_tables():

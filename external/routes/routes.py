@@ -3,6 +3,7 @@ from flask import Flask, app
 from external.utils.error_handled_request import register_error_handlers
 from external.routes.user_routes import UserRoute
 from external.routes.zapi_routes import ZapiRoute
+from external.routes.study_settings_routes import StudySettingsRoute
 
 
 class Routes:
@@ -26,7 +27,10 @@ class Routes:
             app=app,
             base_route=base_route_v1,
         )
-
+        self.study_settings_route = StudySettingsRoute(
+            app=app,
+            base_route=base_route_v1,
+        )
 
     def build_routes(
         self,
@@ -34,6 +38,7 @@ class Routes:
 
         self.user_route.register_routes()
         self.zapi_route.register_routes()
+        self.study_settings_route.register_routes()
 
     def register_error_handlers(
         self,

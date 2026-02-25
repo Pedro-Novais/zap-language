@@ -10,6 +10,6 @@ def validate_request(
     
     for field in required_fields:
         if field not in request:
-            raise MissingRequiredFieldError(field=field)
+            raise MissingRequiredFieldError()
         
     return None

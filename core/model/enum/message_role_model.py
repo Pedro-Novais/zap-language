@@ -1,6 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
-class MessageRoleModel(str, Enum):
+
+class MessageRoleModel(StrEnum):
     USER = "USER"
     ASSISTANT = "ASSISTANT"
     SYSTEM = "SYSTEM"

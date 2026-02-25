@@ -36,13 +36,24 @@ class EmailAlreadyExistsError(ApplicationError):
 class MissingRequiredFieldError(ApplicationError):
 
     def __init__(
-        self, 
-        field: str,
+        self,
     ) -> None:
 
         super().__init__(
-            message_error=f"Missing required field: {field}",
+            message_error=f"Missing required field",
             status_code=400,
+            )
+        
+
+class UnhandledConfigurationValueError(ApplicationError):
+
+    def __init__(
+        self,
+    ) -> None:
+
+        super().__init__(
+            message_error=f"Foram enviados valores não tratados para a configuração",
+            status_code=406,
             )
         
 
@@ -163,5 +174,16 @@ class CodeExpiredError(ApplicationError):
         super().__init__(
             message_error="Código de verificação expirado",
             status_code=400,
+            )
+        
+class AiWithQuotaLimitReachedError(ApplicationError):
+
+    def __init__(
+        self,
+    ) -> None:
+            
+        super().__init__(
+            message_error="Limite de cota da IA foi atingido",
+            status_code=502,
             )
         

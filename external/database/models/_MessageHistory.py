@@ -1,11 +1,25 @@
 import uuid
-from datetime import datetime, timezone
-from sqlalchemy import String, DateTime, ForeignKey, Text
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from datetime import (
+    datetime, 
+    timezone,
+)
+from sqlalchemy import (
+    DateTime, 
+    ForeignKey, 
+    Text,
+    Enum,
+    Boolean,
+    text,
+)
+from sqlalchemy.orm import (
+    Mapped, 
+    mapped_column, 
+    relationship,
+)
 from sqlalchemy.dialects.postgresql import UUID
 
 from external.database.base import Base
-from core.model import MessageRoleModel
+from core.model.enum import MessageRoleModel
 
 
 class MessageHistory(Base):
@@ -20,8 +34,15 @@ class MessageHistory(Base):
         ForeignKey("users.id", ondelete="CASCADE"), 
         nullable=False
     )
-    role: Mapped[str] = mapped_column(String(20), default=MessageRoleModel.USER.value)
+    role: Mapped[MessageRoleModel] = mapped_column(Enum(MessageRoleModel), default=MessageRoleModel.USER)
     content: Mapped[str] = mapped_column(Text, nullable=False)
+    is_allowed: Mapped[bool] = mapped_column(
+        Boolean, 
+        default=True, 
+        index=True,
+        server_default=text('true'),
+        nullable=False,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         default=lambda: datetime.now(timezone.utc),

@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import (
     IntegrityError,
     OperationalError,
+    DBAPIError
 )
 from contextlib import contextmanager
 
@@ -27,7 +28,7 @@ def get_db_session():
     session = SessionLocal()
     try:
         yield session
-    except OperationalError as e:
+    except DBAPIError as e:
         session.rollback()
         raise ExternalServiceError(error=e)
     finally:

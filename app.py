@@ -1,23 +1,40 @@
 import sys
 import os
+from threading import Thread
+
 from loguru import logger
 from flask import Flask
 from flask_cors import CORS
 from dotenv import load_dotenv
 from werkzeug.middleware.proxy_fix import ProxyFix
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 from external.routes import Routes
+from external.database.models import(
+    StudySettings,
+    User,
+    PhoneVerification,
+    Subscription,
+    Plan,
+    MessageHistory,
+    SystemConfig,
+)
+from external.services.routine_tasks import worker
 
 logger.remove()
+load_dotenv()
+env_production = os.getenv("ENV") == "production"
 
+app = Flask(__name__)
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
 
-def main() -> None:
-    
-    load_dotenv()
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
+def create_app():
     config_logger()
-    
-    app = Flask(__name__)
-    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
     
     CORS(
         app=app, 
@@ -31,15 +48,10 @@ def main() -> None:
     routes.register_error_handlers()
     routes.build_routes()
     
-    port = int(os.getenv("PORT"))
-    app.run(
-        debug=True,
-        host="0.0.0.0",
-        port=port
-    )
+    return app
 
 def config_logger() -> None:
-    if os.getenv("ENV") != "production":
+    if not env_production:
         logger.add(
             sys.stderr, 
             format="<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{message}</cyan>",
@@ -52,6 +64,8 @@ def config_logger() -> None:
 
 if __name__ == "__main__":     
     try:
-        main()
+        application = create_app()
+        port = int(os.getenv("PORT", 5000))
+        application.run(debug=not env_production, host="0.0.0.0", port=port, use_reloader=False)
     except Exception as e:
         print(f"Erro ao inicializar: {e}")

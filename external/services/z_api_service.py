@@ -1,11 +1,10 @@
 import os
 import requests
-import logging
+
+from loguru import logger
 
 from core.interface.service import WhatsappService
 from core.shared.errors import ErrorSendingMessageToWhatsapp
-
-logger = logging.getLogger(__name__)
 
 
 class ZApiService(WhatsappService):
@@ -35,6 +34,7 @@ class ZApiService(WhatsappService):
         }
 
         try:
+            logger.info(f"Sending message via Z-API to {phone}")
             response = requests.post(
                 url=f"{self.zapi_base_url}/send-text", 
                 json=payload, 
@@ -44,5 +44,5 @@ class ZApiService(WhatsappService):
             logger.info(f"Message sent to {phone}")
             
         except Exception as e:
-            logger.error(f"Error sending message via Z-API: {e}")
+            logger.error(f"Error sending message via Z-API: {e}", exc_info=True)
             raise ErrorSendingMessageToWhatsapp(error=e)

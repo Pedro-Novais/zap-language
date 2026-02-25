@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from external.database.models._User import User
+from core.model import UserModel
+
 
 class UserRepository(ABC):
 
@@ -9,14 +10,23 @@ class UserRepository(ABC):
     def get_user_by_id(
         self, 
         user_id: str,
-    ) -> Optional[User]:
+    ) -> Optional[UserModel]:
         
         raise NotImplementedError()
 
+    @abstractmethod
     def get_user_by_email(
         self, 
         email: str,
-    ) -> Optional[User]:
+    ) -> Optional[UserModel]:
+        
+        raise NotImplementedError()
+    
+    @abstractmethod
+    def get_user_by_phone_number(
+        self, 
+        phone: str,
+    ) -> Optional[UserModel]:
         
         raise NotImplementedError()
 
@@ -26,7 +36,7 @@ class UserRepository(ABC):
         email: str,
         name: str,
         password_hash: str,
-    ) -> Optional[User]:
+    ) -> None:
         
         raise NotImplementedError()
     
