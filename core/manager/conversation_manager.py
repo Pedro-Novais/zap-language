@@ -42,7 +42,7 @@ class ConversationManager:
 
         self.instruction_builder = InstructionBuilder()
 
-        self.MAX_MESSAGES_WINDOW = 3
+        self.MAX_MESSAGES_WINDOW = 1
         self.BAN_TIME_SECONDS = 1800
 
     def process_message(
@@ -68,9 +68,9 @@ class ConversationManager:
         )
         try:
             self.redis.lpush(RedisKeyManager.queue_whatasapp_messages(), json.dumps(payload))
-            logger.info(f"📥 Mensagem de {phone} adicionada para a fila de processamento.")
+            logger.info(f"Message from {phone} added to queue successfully.")
         except Exception as e:
-            logger.error(f"❌ Erro ao enfileirar mensagem para {phone}: {e}")
+            logger.error(f"Error adding message to queue for {phone}: {e}", exc_info=True)
 
     def reply_user(
         self, 
@@ -78,32 +78,17 @@ class ConversationManager:
         message_text: str,
     ) -> None:
 
-        key_processing = self._get_key_processing(phone=phone)
-        key_ban = self._get_key_ban(phone=phone)
         try:
-            self.redis.setex(
-                name=key_processing, 
-                time=30, 
-                value="1",
-            )
             user = self.user_manager.get_study_settings_by_phone(phone=phone)
             if not user or not user.whatsapp_enabled:
-                logger.error(f"User not registered, adding to blacklist: {phone}")
-                self.redis.setex(key_ban, self.BAN_TIME_SECONDS, "1")
-                self.whatsapp_service.send_text(
-                    phone=phone, 
-                    message="Para utilização desse serviço, é necessário habilitar nosso plano de estudo de idiomas."
-                )
+                logger.error(f"User not found or whatsapp not enabled, adding to blacklist:{phone}")
+                self._ban_user(phone=phone)
                 return
 
             instruction = self.instruction_builder.build(user=user)
             if not instruction:
                 logger.error(f"Instruction not found, adding to blacklist: {phone}")
-                self.redis.setex(key_ban, self.BAN_TIME_SECONDS, "1")
-                self.whatsapp_service.send_text(
-                    phone=phone, 
-                    message="Para utilização desse serviço, é necessário habilitar nosso plano de estudo de idiomas."
-                )
+                self._ban_user(phone=phone)
                 return
             
             history = self.message_history_manager.get_message_history(
@@ -138,9 +123,22 @@ class ConversationManager:
             logger.error(f"Error processing message: {e}", exc_info=True)
             raise e
 
-        finally:
-            self.redis.delete(key_processing)
+    def _ban_user(
+        self, 
+        phone: str,
+        message: str = "Para utilização desse serviço, é necessário habilitar nosso plano de estudo de idiomas.",
+        notify_user: bool = True,
+    ) -> None:
 
+        key_ban = self._get_key_ban(phone=phone)
+        self.redis.setex(key_ban, self.BAN_TIME_SECONDS, "1")
+        logger.warning(f"Banning user {phone} for {self.BAN_TIME_SECONDS} seconds.")
+        if notify_user:
+            self.whatsapp_service.send_text(
+                phone=phone, 
+                message=message,
+            )
+        
     def _get_tutor_response(
         self,
         instruction: str,
@@ -153,7 +151,6 @@ class ConversationManager:
             history=history,
             message=message,
         )
-        self.redis.setex(RedisKeyManager.ai_health_status(), 10, "1")
         return tutor_response
 
     def _is_allowed(
@@ -161,16 +158,10 @@ class ConversationManager:
         phone: str,
     ) -> bool:
 
-        key_processing = self._get_key_processing(phone=phone)
         key_ban = self._get_key_ban(phone=phone)
         key_rate_limit = self._get_key_rate_limit(phone=phone)
-
         if self.redis.exists(key_ban):
-            logger.warning(f"🚫 [Spam] Usuário {phone} ignorado (Blacklist).")
-            return False
-
-        if self.redis.exists(key_processing):
-            logger.info(f"⏳ [Wait] Usuário {phone} já possui tarefa em andamento.")
+            logger.warning(f"User {phone} is currently banned. Ignoring message.")
             return False
 
         current_count = self.redis.incr(key_rate_limit)
@@ -178,12 +169,7 @@ class ConversationManager:
             self.redis.expire(key_rate_limit, 20)
 
         if current_count > self.MAX_MESSAGES_WINDOW:
-            logger.error(f"🚨 [Ban] Usuário {phone} excedeu limite e foi para blacklist.")
-            self.redis.setex(key_ban, self.BAN_TIME_SECONDS, "true")
-            self.whatsapp_service.send_text(
-                phone=phone, 
-                message="⚠️ Você enviou mensagens muito rápido. Seu acesso foi suspenso por 30 minutos."
-            )
+            logger.error(f"User {phone} exceeded rate limit with {current_count} messages. We will ignore their messages until us replying them.")
             return False
 
         return True

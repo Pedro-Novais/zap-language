@@ -31,7 +31,7 @@ class AITutorService(AITutorService):
                 },
             )
         )
-        self.model_id = "gemini-2.0-flash" 
+        self.model_id = "gemini-3-flash-preview" 
 
     def get_tutor_response(
         self,

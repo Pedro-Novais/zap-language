@@ -17,12 +17,6 @@ class RedisKeyManager:
         return f"{cls.PREFIX}:rate_limit:{phone}"
     
     @classmethod
-    def ai_health_status(
-        cls, 
-    ) -> str:
-        return f"{cls.PREFIX}:ai_health_status"
-    
-    @classmethod
     def user_history(
         cls, 
         phone: str,

@@ -75,3 +75,4 @@ class TestAddPhoneNumberInteractor:
         
         with pytest.raises(UserAlreadyHasPhoneNumberError):
             interactor.add_phone_number(user_id=fake.uuid4(), phone_number="5511999999999")
+            
