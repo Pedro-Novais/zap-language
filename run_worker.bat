@@ -3,5 +3,5 @@ echo Ativando ambiente virtual...
 call venv\Scripts\activate
 
 echo Subindo worker zap language...
-python worker_run.py
+celery -A worker.run worker --loglevel=info --pool=solo
 pause

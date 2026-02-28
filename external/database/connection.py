@@ -2,11 +2,8 @@ import os
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.exc import (
-    IntegrityError,
-    OperationalError,
-    DBAPIError
-)
+from sqlalchemy.exc import DBAPIError
+
 from contextlib import contextmanager
 
 from core.shared.errors import ExternalServiceError

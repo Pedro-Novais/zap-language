@@ -6,7 +6,7 @@ from core.interface.repository import (
     StudySettingsRepository,
     UserRepository,
 )
-from core.interface.service import EventPublisherService
+from core.interface.service import RedisService
 from core.shared.errors import UnhandledConfigurationValueError
 from core.model.enum import (
     TeacherPersonaType, 
@@ -22,12 +22,12 @@ class StudySettingsInteractor:
         self,
         user_repository: UserRepository,
         study_settings_repository: StudySettingsRepository,
-        event_publisher_service: EventPublisherService,
+        redis_service: RedisService,
     ) -> None:
 
         self.user_repository = user_repository
         self.study_settings_repository = study_settings_repository
-        self.event_publisher_service = event_publisher_service
+        self.redis_service = redis_service
         
     def create(
         self,
@@ -94,7 +94,7 @@ class StudySettingsInteractor:
     ) -> None:
         
         phone = self.user_repository.get_phone_number_by_user_id(user_id=user_id)
-        self.event_publisher_service.notify_settings_changed(phone=phone)
+        self.redis_service.notify_settings_changed(phone=phone)
         
     @staticmethod
     def _get_preferred_topics(preferred_topics: Optional[List[str]]) -> List[str]:

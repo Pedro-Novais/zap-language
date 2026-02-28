@@ -1,6 +1,7 @@
-import jwt
 import os
 from functools import wraps
+
+import jwt
 from flask import (
     jsonify, 
     make_response, 
@@ -11,11 +12,10 @@ from jwt.exceptions import (
     InvalidTokenError,
 )
 
-from external.services import redis_client
-from external.repositories import UserRepositoryImpl
-
-
-user_repository = UserRepositoryImpl()
+from external.container import (
+    redis_service,
+    user_repository,
+)
 
 
 def token_required(f):
@@ -35,16 +35,15 @@ def token_required(f):
                 algorithms=['HS256'],
             )
             user_id = data['userId']
-            cache_key = f"user_active:{user_id}"
             try:
-                if redis_client.get(cache_key):
+                if redis_service.api_user_cached(user_id=user_id):
                     pass 
                 else:
                     user = user_repository.get_user_by_id(user_id=user_id)
                     if not user:
                         return jsonify({"error": "Usuário não encontrado"}), 401
                     
-                    redis_client.setex(cache_key, 300, "1")
+                    redis_service.set_api_user_cached(user_id=user_id)
                     
             except Exception as redis_err:
                 print(f"Redis Error: {redis_err}")

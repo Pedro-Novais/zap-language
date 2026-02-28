@@ -45,7 +45,7 @@ class InstructionBuilder:
             f"### PERFIL DO TUTOR\n {persona_text}",
             f"### MÉTODO DE ENSINO\n {dynamic_text}",
             f"### RIGOR GRAMATICAL\n {gramamatical_rigor}",
-            f"### TÓPICO DA CONVERSA\n Assunto: {current_topic}. "
+            f"### TÓPICO ATUAL DA CONVERSA\n Assunto: {current_topic}. "
         ]
         return full_prompt
     

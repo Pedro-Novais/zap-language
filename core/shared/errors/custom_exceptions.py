@@ -1,9 +1,6 @@
-from dataclasses import field
-import email
 from typing import (
     Any,
     Dict,
-    Optional,
 )
 
 
@@ -185,5 +182,17 @@ class AiWithQuotaLimitReachedError(ApplicationError):
         super().__init__(
             message_error="Limite de cota da IA foi atingido",
             status_code=502,
+            )
+        
+        
+class CommandDoesNotExistError(ApplicationError):
+
+    def __init__(
+        self,
+    ) -> None:
+            
+        super().__init__(
+            message_error="Comando não encontrado ou não tratado",
+            status_code=404,
             )
         
