@@ -98,7 +98,7 @@ class CommandHandler:
     ) -> None:
         
         self.user_manager.invalidate_user_cache(phone=phone)
-        self.message_history_manager.clear_history_for_user(phone=phone)
+        self.message_history_manager.clear_message_history_for_user(phone=phone)
     
     def _handle_help_command(
         self, 

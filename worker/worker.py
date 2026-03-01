@@ -1,3 +1,5 @@
+from celery import Task
+from celery.exceptions import Retry
 from loguru import logger
 
 from external.container import (
@@ -12,26 +14,28 @@ from core.shared.errors import (
 )
 
 
-conversation_manager = get_conversation_manager()
-
+conversation_manager = get_conversation_manager()         
+                
 @app_celery.task(
-    bind=True,                         # Permite acessar o contexto da tarefa, como tentativas e tempo de espera
-    max_retries=3,                     # Número máximo de tentativas
-    retry_backoff=True,                # Substitui seu _update_time_to_sleep_on_error
-    retry_backoff_max=600,             # Tempo máximo de espera (10 min)
-    retry_jitter=True,                 # Evita que muitos workers tentem ao mesmo tempo
+    bind=True,                # Permite acessar o contexto da tarefa, como tentativas e tempo de espera
+    max_retries=3,            # Número máximo de tentativas
+    retry_backoff=True,       # Substitui seu _update_time_to_sleep_on_error
+    retry_backoff_max=600,    # Tempo máximo de espera (10 min)
+    retry_jitter=True,        # Evita que muitos workers tentem ao mesmo tempo
 )
 def process_whatsapp_message(
-    self, 
+    self: Task, 
     phone: str, 
     message: str,
 ) -> None:
     
-    try:
+    try:    
         if redis_service.has_lock_global_ia():
-            logger.warning(f"Global IA lock is active. Skipping message processing for {phone}.")
-            self.apply_async(args=[phone, message], countdown=10)
-            return
+            logger.warning(f"Global IA lock is active. Skipping message processing for {phone} to try again later.")
+            raise self.retry(
+                countdown=15, 
+                count_retries=False,
+            )
          
         logger.info(f"Processing message for {phone}")
         
@@ -44,8 +48,10 @@ def process_whatsapp_message(
             phone=phone, 
             message_text=message,
         )
-        redis_service.set_lock_global_ia(timeout=15)
+        
         logger.info(f"Message from {phone} processed successfully.")
+        redis_service.set_lock_global_ia(timeout=15)
+        redis_service.delete_processing_phone(phone=phone)
     
     except AiWithQuotaLimitReachedError as exc:
         timeout = 30
@@ -56,10 +62,16 @@ def process_whatsapp_message(
     except ErrorSendingMessageToWhatsapp as exc:
         logger.error(f"Failed to send message to {phone} by whatsapp: {exc}")
         raise self.retry(exc=exc)
+    
+    except Retry:
+        current_attempt = self.request.retries
+        logger.warning(
+            f"Rescheduling processing for {phone}"
+            f"Current attempt: {current_attempt} of {self.max_retries}"
+        )
+        raise
 
     except Exception as exc:
-        logger.error(
-            "Error processing message from {phone_val}: {exception}", 
-            phone_val=phone, exception=exc, exc_info=True,
-        )
+        logger.error(f"Fatal error processing message from {phone}, we will not try again.")
+        redis_service.delete_processing_phone(phone=phone)
         return

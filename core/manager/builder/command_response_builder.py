@@ -1,6 +1,3 @@
-from core.model.enum import CommandTypeGet, CommandTypeSet
-
-
 class CommandResponseBuilder:
     
     @staticmethod

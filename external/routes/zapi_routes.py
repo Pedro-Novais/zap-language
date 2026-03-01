@@ -5,8 +5,11 @@ from flask import (
     Response,
     jsonify
 )
+from loguru import logger
 
 from worker import process_whatsapp_message 
+
+from external.container import redis_service
 
 
 class ZapiRoute:
@@ -37,6 +40,11 @@ class ZapiRoute:
             message = data['text'].get('message', None)
 
             if phone and message:
+                if not redis_service.set_current_processing_phone(phone=phone):
+                    logger.info(f"The phone {phone} is already being processed, ignoring the message.")
+                    return jsonify({"status": "ignored"}), 200
+                
+                logger.info(f"Received message from {phone}, adding to queue.")
                 process_whatsapp_message.delay(
                     phone=phone, 
                     message=message,

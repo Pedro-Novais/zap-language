@@ -35,11 +35,11 @@ def get_conversation_manager() -> ConversationManager:
     global conversation_manager
     if conversation_manager is None:
         message_history_manager = MessageHistoryManager(
-            redis_client=redis_client,
+            redis_service=redis_service,
             history_repository=history_repository,
         )
         user_manager = UserManager(
-            redis_client=redis_client,
+            redis_service=redis_service,
             user_repository=user_repository,
         )
         
@@ -53,8 +53,8 @@ def get_conversation_manager() -> ConversationManager:
             message_history_manager=message_history_manager,
             ai_tutor_service=ai_tutor_service, 
             whatsapp_service=whatsapp_service,
-            redis_client=redis_client,
             command_handler=command_handler,
+            redis_service=redis_service,
         )
     
     return conversation_manager

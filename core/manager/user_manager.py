@@ -1,11 +1,10 @@
-import redis
 from typing import Optional
 
 from loguru import logger
 
 from core.interface.repository import UserRepository
+from core.interface.service import RedisService
 from core.model import UserModel
-from core.manager.key import RedisKeyManager
 
 
 class UserManager:
@@ -13,55 +12,47 @@ class UserManager:
     
     def __init__(
         self, 
-        redis_client: redis.Redis, 
+        redis_service: RedisService,
         user_repository: UserRepository, 
         ttl: int = 3600,
     ) -> None:
         
-        self.redis = redis_client
         self.user_repository = user_repository
+        
+        self.redis_service = redis_service
+        
         self.TTL = ttl
 
-    def get_study_settings_by_phone(
+    def get_user_profile(
         self, 
         phone: str,
     ) -> Optional[UserModel]:
         
-        key = self._get_key_user_profile(phone=phone)
-        logger.info(f"👤 Buscando perfil de {phone}")
+        logger.info(f"Getting user profile for {phone}")
         
-        cached_user = self.redis.get(key)
-        if cached_user:
-            logger.info(f"👤 Cache Hit para perfil de {phone}")
-            return UserModel.model_validate_json(cached_user)
+        user_profile_cached = self.redis_service.get_user_profile(phone=phone)
+        if user_profile_cached:
+            logger.info(f"Cache hit to phone: {phone}")
+            return UserModel.model_validate_json(user_profile_cached)
 
-        logger.info(f"👤 Cache Miss para perfil de {phone}. Buscando no banco...")
-        user_data = self.user_repository.get_user_by_phone_number(phone=phone)
-        if not user_data:
-            logger.info(f"👤 Usuário não encontrado para {phone}")
+        logger.info(f"Cache miss to phone: {phone}. Getting from database")
+        user_profile = self.user_repository.get_user_by_phone_number(phone=phone)
+        if not user_profile:
+            logger.error(f"User not found for phone: {phone}")
             return None
 
-        self.redis.setex(key, self.TTL, user_data.model_dump_json())
-        return user_data
+        self.redis_service.set_user_profile(
+            phone=phone,
+            user_profile=user_profile.model_dump_json(),
+        )
+        return user_profile
 
     def invalidate_user_cache(
         self, 
         phone: str,
     ) -> None:
         
-        key = self._get_key_user_profile(phone=phone)
-        self.redis.delete(key)
+        logger.info(f"Invalidating user cache for {phone}")
         
-    @staticmethod
-    def _get_key_user_profile(
-        phone: str,
-    ) -> str:
-        
-        return RedisKeyManager.user_profile(phone=phone)
+        self.redis_service.delete_user_profile(phone=phone)
     
-    @staticmethod
-    def _get_key_update_user_profile(
-        phone: str,
-    ) -> str:
-        
-        return RedisKeyManager.update_user_profile(phone=phone)

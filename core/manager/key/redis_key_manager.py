@@ -18,11 +18,11 @@ class RedisKeyManager:
         return f"{cls.PREFIX_WORKER}:rate_limit:{phone}"
     
     @classmethod
-    def user_history(
+    def user_message_history(
         cls, 
         phone: str,
     ) -> str:
-        return f"{cls.PREFIX_WORKER}:history:{phone}"
+        return f"{cls.PREFIX_WORKER}:message_history:{phone}"
     
     @classmethod
     def black_list_phone(
