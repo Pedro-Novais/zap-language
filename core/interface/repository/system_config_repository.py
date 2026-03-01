@@ -1,14 +1,12 @@
 from typing import Dict
 from abc import ABC, abstractmethod
 
-from core.model import SystemConfigModel
-
 
 class SystemConfigRepository(ABC):
 
     @abstractmethod
-    def get(
+    def get_configurations(
         self,
-    ) -> Dict[str, SystemConfigModel]:
+    ) -> Dict[str, str]:
         
         raise NotImplementedError()

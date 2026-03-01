@@ -69,7 +69,7 @@ class CommandHandler:
     ) -> str:
         
         if command == CommandTypeSet.RESET.value:
-            logger.info(f"Comando de reset identificado para {phone}")
+            logger.info(f"RESET command received for {phone}")
             self._handle_reset_command(phone=phone)
             return CommandResponseBuilder.response_for_reset_command()
         
@@ -83,12 +83,6 @@ class CommandHandler:
         
         if command == CommandTypeGet.HELP.value:
             return self._handle_help_command()
-        
-        if command == CommandTypeGet.TUTOR.value:
-            return 
-        
-        if command == CommandTypeGet.TRANSLATE.value:
-            return 
         
         raise CommandDoesNotExistError()
         

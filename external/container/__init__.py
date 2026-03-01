@@ -8,5 +8,6 @@ from external.container.instances import (
     ai_tutor_service,
     password_hasher_service,
     redis_service,
+    system_config,
 )
 from external.container.celery import app_celery

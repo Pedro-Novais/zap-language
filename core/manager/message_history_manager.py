@@ -2,6 +2,7 @@ from typing import List, Dict
 
 from loguru import logger
 
+from core.shared.model import HistoryManagerConfig
 from core.interface.repository import MessageHistoryRepository
 from core.interface.service import RedisService
 from core.model import MessageHistoryModel
@@ -13,13 +14,12 @@ class MessageHistoryManager:
 
     def __init__(
         self, 
+        config: HistoryManagerConfig,
         redis_service: RedisService,
         history_repository: MessageHistoryRepository, 
-        limit: int = 10,
     ) -> None:
         
-        self.LIMIT = limit
-        self.TTL = 1800
+        self.config = config
         
         self.redis_service = redis_service
         self.history_repository = history_repository
@@ -40,7 +40,7 @@ class MessageHistoryManager:
         logger.info(f"Cache miss to {phone}. Getting message histories from database")
         message_history_db = self.history_repository.get_messages(
             user_id=user_id, 
-            limit=self.LIMIT,
+            limit=self.config.limit_message_from_history,
         )
         if message_history_db:
             logger.info(f"Message history from database found to {phone}. Adding to cache")

@@ -2,6 +2,7 @@ from typing import Optional
 
 import redis
 
+from core.shared.model import RedisConfig
 from core.interface.service import RedisService
 from core.manager.key import RedisKeyManager
 
@@ -10,12 +11,13 @@ class RedisServiceImpl(RedisService):
 
     def __init__(
         self,
+        config: RedisConfig,
         redis_client: redis.Redis,
     ) -> None:
         
+        self.config = config
+        
         self.redis_client = redis_client
-        self.timeout = 30
-        self.limit = 10
     
     def notify_settings_changed(
         self,
@@ -25,7 +27,7 @@ class RedisServiceImpl(RedisService):
         self.redis_client.setex(
             name=RedisKeyManager.update_user_profile(phone=phone), 
             value="1", 
-            time=self.timeout,
+            time=self.config.timeout_to_notify_user_changes,
         )
         
     def has_update_to_user_profile(
@@ -50,13 +52,14 @@ class RedisServiceImpl(RedisService):
     
     def set_lock_global_ia(
         self,
-        timeout,
+        timeout: Optional[int] = None,
     ) -> None:
         
+        expiration = timeout or self.config.time_to_increment_in_ai_lock
         self.redis_client.set(
             name=RedisKeyManager.global_ia_lock(),
             value="0",
-            ex=timeout,
+            ex=expiration,
         )
         
     def get_api_user_cached(
@@ -71,7 +74,11 @@ class RedisServiceImpl(RedisService):
         user_id: str,
     ) -> None:
         
-        self.redis_client.setex(RedisKeyManager.api_user_cached(user_id=user_id), 300, "1")
+        self.redis_client.set(
+            name=RedisKeyManager.api_user_cached(user_id=user_id),
+            ex=self.config.timeout_user_cached_to_api,
+            value="1",
+            )
         
     def user_is_banned(
         self,
@@ -89,7 +96,7 @@ class RedisServiceImpl(RedisService):
             self.redis_client.set(
                 name=RedisKeyManager.processing_phone(phone=phone),
                 value="locked",
-                ex=self.timeout,
+                ex=self.config.timeout_to_processing_phone,
                 nx=True,
             )
         )
@@ -113,7 +120,11 @@ class RedisServiceImpl(RedisService):
         phone: str,
     ) -> None:
         
-        self.redis_client.setex(RedisKeyManager.black_list_phone(phone=phone), self.timeout, "1")
+        self.redis_client.set(
+            name=RedisKeyManager.black_list_phone(phone=phone),
+            ex=self.config.timeout_to_ban_phone,
+            value="1",
+        )
         
     def get_user_profile(
         self,
@@ -128,7 +139,11 @@ class RedisServiceImpl(RedisService):
         user_profile: str,
     ) -> None:
         
-        self.redis_client.setex(RedisKeyManager.user_profile(phone=phone), self.timeout, user_profile)
+        self.redis_client.set(
+            name=RedisKeyManager.user_profile(phone=phone), 
+            ex=self.config.timeout_to_user_profile, 
+            value=user_profile,
+        )
         
     def delete_user_profile(
         self,
@@ -145,7 +160,7 @@ class RedisServiceImpl(RedisService):
         messages_history = self.redis_client.lrange(
             name=RedisKeyManager.user_message_history(phone=phone), 
             start=0, 
-            end=self.timeout-1,
+            end=self.config.limit_message_history,
         )
         return messages_history
     
@@ -157,8 +172,8 @@ class RedisServiceImpl(RedisService):
         
         key = RedisKeyManager.user_message_history(phone=phone)
         self.redis_client.lpush(key, message)
-        self.redis_client.ltrim(key, 0, self.limit - 1)
-        self.redis_client.expire(key, self.timeout)
+        self.redis_client.ltrim(key, 0, self.config.limit_message_history)
+        self.redis_client.expire(key, self.config.timeout_to_message_history)
         
     def delete_message_history(
         self,

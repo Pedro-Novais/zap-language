@@ -8,20 +8,16 @@ from core.model import UserModel
 
 
 class UserManager:
-
     
     def __init__(
         self, 
         redis_service: RedisService,
         user_repository: UserRepository, 
-        ttl: int = 3600,
     ) -> None:
         
         self.user_repository = user_repository
         
         self.redis_service = redis_service
-        
-        self.TTL = ttl
 
     def get_user_profile(
         self, 

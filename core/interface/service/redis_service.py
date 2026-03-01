@@ -41,7 +41,7 @@ class RedisService(ABC):
     @abstractmethod
     def set_lock_global_ia( 
         self,
-        timeout,
+        timeout: Optional[int] = None,
     ) -> None:
         
         raise NotImplementedError()

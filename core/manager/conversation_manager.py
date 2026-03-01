@@ -1,7 +1,6 @@
-from typing import List
-
 from loguru import logger
 
+from core.shared.model import ConversationManagerConfig
 from core.manager.message_history_manager import MessageHistoryManager
 from core.manager.user_manager import UserManager
 from core.manager.command import CommandHandler
@@ -11,14 +10,13 @@ from core.interface.service import (
     WhatsappService,
     RedisService,
 )
-from core.model.message_history_model import MessageHistoryModel
-from core.shared.errors import ApplicationError
 
 
 class ConversationManager:
 
     def __init__(
         self,
+        config: ConversationManagerConfig,
         ai_tutor_service: AITutorService, 
         whatsapp_service: WhatsappService,
         redis_service: RedisService,
@@ -26,6 +24,8 @@ class ConversationManager:
         message_history_manager: MessageHistoryManager,
         command_handler: CommandHandler,
     ) -> None:
+        
+        self.config = config
 
         self.user_manager = user_manager
         self.message_history_manager = message_history_manager
@@ -36,11 +36,7 @@ class ConversationManager:
         self.whatsapp_service = whatsapp_service
         self.redis_service = redis_service
 
-
         self.instruction_builder = InstructionBuilder()
-
-        self.MAX_MESSAGES_WINDOW = 1
-        self.BAN_TIME_SECONDS = 1800
 
     def process_message(
         self, 
@@ -128,13 +124,12 @@ class ConversationManager:
         self, 
         phone: str,
         message: str = "Para utilização desse serviço, é necessário habilitar nosso plano de estudo de idiomas.",
-        notify_user: bool = True,
     ) -> None:
 
         logger.warning(f"Banning phone {phone}.")
         
         self.redis_service.ban_phone(phone=phone)
-        if notify_user:
+        if self.config.notify_user_when_banned:
             self.whatsapp_service.send_text(
                 phone=phone, 
                 message=message,
