@@ -38,36 +38,35 @@ class ConversationManager:
 
         self.instruction_builder = InstructionBuilder()
 
-    def process_message(
+    def can_process_message(
         self, 
         phone: str, 
     ) -> bool:
 
-        if not self._is_allowed(phone=phone):
+        if self.redis_service.user_is_banned(phone=phone):
+            logger.warning(f"User {phone} is currently banned. Ignoring message.")
             return False
 
-        self._invalidate_cache_if_user_has_been_modified(phone=phone)
         return True
 
-    def reply_user(
+    def invalidate_cache_if_user_has_been_modified(
         self, 
-        phone: str, 
-        message_text: str,
+        phone: str,
     ) -> None:
 
-        is_message_command = self.command_handler.is_command(user_message=message_text)
-        if is_message_command:
-            self._respond_to_command(
-                phone=phone,
-                message_text=message_text,
-            )
-        else:
-            self._respond_user_with_tutor_message(
-                phone=phone, 
-                message_text=message_text,
-            )
+        if self.redis_service.has_update_to_user_profile(phone=phone):
+            self.message_history_manager.clear_message_history_for_user(phone=phone)
+            self.user_manager.invalidate_user_cache(phone=phone)
+            self.redis_service.delete_update_user_profile(phone=phone)
 
-    def _respond_to_command(
+    def message_is_command(
+        self, 
+        message_text: str,
+    ) -> bool:
+
+        return self.command_handler.is_command(user_message=message_text)
+    
+    def respond_to_command(
         self, 
         phone: str, 
         message_text: str,
@@ -82,7 +81,7 @@ class ConversationManager:
             message=response_text,
         )
     
-    def _respond_user_with_tutor_message(
+    def respond_user_with_tutor_message(
         self, 
         phone: str, 
         message_text: str,
@@ -134,24 +133,3 @@ class ConversationManager:
                 phone=phone, 
                 message=message,
             )
-
-    def _is_allowed(
-        self, 
-        phone: str,
-    ) -> bool:
-
-        if self.redis_service.user_is_banned(phone=phone):
-            logger.warning(f"User {phone} is currently banned. Ignoring message.")
-            return False
-
-        return True
-
-    def _invalidate_cache_if_user_has_been_modified(
-        self, 
-        phone: str,
-    ) -> None:
-
-        if self.redis_service.has_update_to_user_profile(phone=phone):
-            self.message_history_manager.clear_message_history_for_user(phone=phone)
-            self.user_manager.invalidate_user_cache(phone=phone)
-            self.redis_service.delete_update_user_profile(phone=phone)

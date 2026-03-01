@@ -48,11 +48,11 @@ class CommandHandler:
                 )
             
         except CommandDoesNotExistError as ex:
-            logger.error(f"Error processing command for {phone}: {ex}")
+            logger.error(f"Command {command} does not exist for")
             return CommandResponseBuilder.response_for_error_command()
         
         except Exception as ex:
-            logger.error(f"Unexpected error processing command for {phone}: {ex}", exc_info=True)
+            logger.error(f"Unexpected error processing command for {phone}", exc_info=True)
             raise ex
     
     def is_command(
@@ -69,7 +69,7 @@ class CommandHandler:
     ) -> str:
         
         if command == CommandTypeSet.RESET.value:
-            logger.info(f"RESET command received for {phone}")
+            logger.info(f"[RESET] command received for {phone}")
             self._handle_reset_command(phone=phone)
             return CommandResponseBuilder.response_for_reset_command()
         

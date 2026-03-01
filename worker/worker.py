@@ -34,24 +34,34 @@ def process_whatsapp_message(
 ) -> None:
     
     try:    
-        if redis_service.has_lock_global_ia():
-            logger.warning(f"Global IA lock is active. Skipping message processing for {phone} to try again later.")
-            raise self.retry(
-                countdown=config.timeout_to_message_lock_by_ai, 
-                count_retries=False,
-            )
-         
         logger.info(f"Processing message for {phone}")
         
-        is_valid = conversation_manager.process_message(phone=phone)
-        if not is_valid:
-            logger.warning(f"Message from {phone} not processed due to restrictions or AI health.")
+        can_process = conversation_manager.can_process_message(phone=phone)
+        if not can_process:
+            logger.warning(f"Message from {phone} can't be processed. Ignoring message")
             return
+        
+        conversation_manager.invalidate_cache_if_user_has_been_modified(phone=phone)
+        
+        if conversation_manager.message_is_command(message_text=message):
+            logger.info(f"Message from {phone} is a command. Responsing to command")
+            conversation_manager.respond_to_command(
+                phone=phone, 
+                message_text=message,
+            )
+        else:
+            if redis_service.has_lock_global_ia():
+                logger.warning(f"Global IA lock is active. Skipping message for {phone} to try again later.")
+                raise self.retry(
+                    countdown=config.timeout_to_message_lock_by_ai, 
+                    count_retries=False,
+                )
             
-        conversation_manager.reply_user(
-            phone=phone, 
-            message_text=message,
-        )
+            logger.info("Message from {phone} is study message. Getting tutor response")
+            conversation_manager.respond_user_with_tutor_message(
+                phone=phone, 
+                message_text=message,
+            )
         
         logger.info(f"Message from {phone} processed successfully.")
         redis_service.set_lock_global_ia()
