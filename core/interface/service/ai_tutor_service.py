@@ -14,7 +14,7 @@ class AITutorService(ABC):
         self,
         message: str,
         instruction: str, 
-        history: Optional[List[MessageHistoryModel]],
+        history: List[MessageHistoryModel],
     ) -> str:
         
         raise NotImplementedError()

@@ -27,6 +27,9 @@ class MessageHistoryModel(BaseModel):
     @field_validator("created_at", mode="after")
     @classmethod
     def ensure_utc(cls, v: datetime) -> datetime:
+        if v is None:
+            return None
+        
         if v.tzinfo is None:
             return v.replace(tzinfo=timezone.utc)
         return v.astimezone(timezone.utc)

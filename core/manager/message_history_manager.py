@@ -11,7 +11,6 @@ from core.model.enum import MessageRoleModel
 
 class MessageHistoryManager:
    
-
     def __init__(
         self, 
         config: HistoryManagerConfig,

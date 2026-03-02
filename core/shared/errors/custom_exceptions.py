@@ -196,3 +196,25 @@ class CommandDoesNotExistError(ApplicationError):
             status_code=404,
             )
         
+class GlobalIALockError(ApplicationError):
+
+    def __init__(
+        self,
+    ) -> None:
+            
+        super().__init__(
+            message_error="IA está bloqueada globalmente",
+            status_code=400,
+            )
+        
+class UserBannedError(ApplicationError):
+
+    def __init__(
+        self,
+    ) -> None:
+            
+        super().__init__(
+            message_error="Usuário bloqueado",
+            status_code=400,
+            )
+    

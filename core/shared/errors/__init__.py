@@ -15,4 +15,6 @@ from .custom_exceptions import (
     UnhandledConfigurationValueError,
     AiWithQuotaLimitReachedError,
     CommandDoesNotExistError,
+    GlobalIALockError,
+    UserBannedError,
 )
