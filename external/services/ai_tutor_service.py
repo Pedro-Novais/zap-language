@@ -31,13 +31,13 @@ class AITutorService(AITutorService):
                 },
             )
         )
-        self.model_id = "gemini-2.0-flash" 
+        self.model_id = "gemini-3-flash-preview" 
 
     def get_tutor_response(
         self,
         message: str,
         instruction: List[str], 
-        history: Optional[List[MessageHistoryModel]],
+        history: List[MessageHistoryModel],
     ) -> str:
         
         try:
@@ -70,18 +70,17 @@ class AITutorService(AITutorService):
     @staticmethod
     def _build_content_messages(
         message: str,
-        history: Optional[List[MessageHistoryModel]],
+        history: List[MessageHistoryModel],
     ) -> Content:
         
         contents = []
-        if history:
-            for item in history:
-                role = "user" if item.role == MessageRoleModel.USER else "assistant"
-                content = Content(
-                    role=role,
-                    parts=[Part(text=item.content)]
-                )
-                contents.append(content)
+        for item in history:
+            role = "user" if item.role == MessageRoleModel.USER else "assistant"
+            content = Content(
+                role=role,
+                parts=[Part(text=item.content)]
+            )
+            contents.append(content)
             
         contents.append(Content(role="user", parts=[Part(text=message)]))
         return contents

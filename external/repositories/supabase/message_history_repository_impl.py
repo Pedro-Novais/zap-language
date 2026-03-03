@@ -47,7 +47,7 @@ class MessageHistoryRepositoryImpl(MessageHistoryRepository):
         messages: List[MessageHistoryModel],
     ) -> List[MessageHistoryModel]:
         
-        message_db_instances: List[MessageHistory]= []
+        message_db_instances: List[MessageHistory] = []
         with get_db_session() as session:
             for message in messages:
                 message = MessageHistory(

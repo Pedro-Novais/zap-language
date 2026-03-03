@@ -14,4 +14,7 @@ from .custom_exceptions import (
     CodeExpiredError,
     UnhandledConfigurationValueError,
     AiWithQuotaLimitReachedError,
+    CommandDoesNotExistError,
+    GlobalIALockError,
+    UserBannedError,
 )

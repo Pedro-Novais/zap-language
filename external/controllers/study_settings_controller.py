@@ -3,15 +3,13 @@ from typing import (
     Dict,
 )
 
-from external.repositories import (
-    StudySettingsRepositoryImpl,
-    UserRepositoryImpl,
-)
-from external.services import (
-    redis_client,
-    EventPublisherServiceImpl,
+from external.container import(
+    user_repository,
+    study_settings_repository,
+    redis_service,
 )
 from external.utils import validate_request
+
 from core.interactor import StudySettingsInteractor
 from core.interactor.study_settings.dto import StudySettingsDTO
 
@@ -21,16 +19,11 @@ class StudySettingsController:
     def __init__(
         self,
     ) -> None:
-
-        study_settings_repository = StudySettingsRepositoryImpl()
-        user_repository = UserRepositoryImpl()
-        
-        event_publisher_service = EventPublisherServiceImpl(redis_client=redis_client)
         
         self.study_settings_interactor = StudySettingsInteractor(
             user_repository=user_repository,
             study_settings_repository=study_settings_repository,
-            event_publisher_service=event_publisher_service,
+            redis_service=redis_service,
         )
     
     def create_study_teacher(

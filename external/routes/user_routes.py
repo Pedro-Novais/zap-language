@@ -2,7 +2,6 @@ from flask import (
     Flask,
     Blueprint,
     request,
-    Request,
     Response,
 )
 

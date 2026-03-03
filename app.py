@@ -1,11 +1,13 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 import sys
 import os
-from threading import Thread
 
 from loguru import logger
 from flask import Flask
 from flask_cors import CORS
-from dotenv import load_dotenv
+
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -20,10 +22,9 @@ from external.database.models import(
     MessageHistory,
     SystemConfig,
 )
-from external.services.routine_tasks import worker
 
 logger.remove()
-load_dotenv()
+
 env_production = os.getenv("ENV") == "production"
 
 app = Flask(__name__)

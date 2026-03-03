@@ -9,19 +9,18 @@ from flask import (
     make_response,
 )
 
-from external.repositories import (
-    UserRepositoryImpl,
-    PhoneVerificationRepositoryImpl,
-)
-from external.services import (
-    ZApiService,
-    BcryptPasswordHasherService,
+from external.container import(
+    user_repository,
+    whatsapp_service,
+    password_hasher_service,
+    phone_verification_repository,
 )
 from external.utils import validate_request
+
 from core.interactor import (
     CreateUserInteractor,
     AuthenticateUserInteractor,
-    AddPhoneNumberInteractor
+    AddPhoneNumberInteractor,
 )
 
 
@@ -30,12 +29,6 @@ class UserController:
     def __init__(
         self,
     ) -> None:
-
-        user_repository = UserRepositoryImpl()
-        phone_verification_repository = PhoneVerificationRepositoryImpl()
-        
-        password_hasher_service = BcryptPasswordHasherService()
-        zapi_service = ZApiService()
         
         self.create_user_interactor = CreateUserInteractor(
             user_repository=user_repository,
@@ -46,7 +39,7 @@ class UserController:
             password_hasher_service=password_hasher_service,
         )
         self.add_phone_number_interactor = AddPhoneNumberInteractor(
-            whatsapp_service=zapi_service,
+            whatsapp_service=whatsapp_service,
             user_repository=user_repository,
             phone_verification_repository=phone_verification_repository,
         )

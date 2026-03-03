@@ -1,9 +1,6 @@
-from dataclasses import field
-import email
 from typing import (
     Any,
     Dict,
-    Optional,
 )
 
 
@@ -187,3 +184,37 @@ class AiWithQuotaLimitReachedError(ApplicationError):
             status_code=502,
             )
         
+        
+class CommandDoesNotExistError(ApplicationError):
+
+    def __init__(
+        self,
+    ) -> None:
+            
+        super().__init__(
+            message_error="Comando não encontrado ou não tratado",
+            status_code=404,
+            )
+        
+class GlobalIALockError(ApplicationError):
+
+    def __init__(
+        self,
+    ) -> None:
+            
+        super().__init__(
+            message_error="IA está bloqueada globalmente",
+            status_code=400,
+            )
+        
+class UserBannedError(ApplicationError):
+
+    def __init__(
+        self,
+    ) -> None:
+            
+        super().__init__(
+            message_error="Usuário bloqueado",
+            status_code=400,
+            )
+    
