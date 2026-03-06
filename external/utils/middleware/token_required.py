@@ -11,6 +11,7 @@ from jwt.exceptions import (
     ExpiredSignatureError, 
     InvalidTokenError,
 )
+from loguru import logger
 
 from external.container import (
     redis_service,
@@ -45,8 +46,8 @@ def token_required(f):
                     
                     redis_service.set_api_user_cached(user_id=user_id)
                     
-            except Exception as redis_err:
-                print(f"Redis Error: {redis_err}")
+            except Exception as exc:
+                logger.error(f"Unknown error verifying user token: {exc}")
 
         except (ExpiredSignatureError, InvalidTokenError):
             response = make_response(jsonify({"error": "Sessão expirada"}), 401)
@@ -54,7 +55,7 @@ def token_required(f):
             return response
         
         except Exception as e:
-            print(f"Middleware Error: {e}")
+            logger.error(f"Middleware Error: {e}")
             return jsonify({"error": "Erro na autenticação"}), 500
 
         return f(user_id, *args, **kwargs)

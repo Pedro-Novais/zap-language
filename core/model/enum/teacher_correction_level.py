@@ -11,21 +11,22 @@ class TeacherCorrectionLevel(IntEnum):
         match self:
             case TeacherCorrectionLevel.LIGHT:
                 return (
-                    "Tenha uma correção leve: Priorize 100% a fluidez. "
-                    "Ignore erros pequenos de digitação ou preposições se a mensagem for clara. "
-                    "Só corrija se o erro mudar o sentido da frase ou for algo muito básico (ex: 'I goes')."
+                    "Light correction: 100% priority on fluency. Ignore minor typos or preposition "
+                    "mistakes if the message is clear. Only correct the student if the error "
+                    "changes the meaning or is extremely basic (e.g., 'I goes'). Stay conversational."
                 )
             case TeacherCorrectionLevel.MEDIUM:
                 return (
-                    "Tenha uma correção moderada: O padrão para aprendizado. "
-                    "Responda ao aluno e, ao final, aponte 1 ou 2 erros principais de gramática ou vocabulário. "
-                    "Use um tom encorajador e mostre a forma correta em negrito."
+                    "Moderate correction: The standard learning balance. Respond to the student "
+                    "naturally first. At the end of your message, point out 1 or 2 key grammar "
+                    "or vocabulary mistakes. Use an encouraging tone and show the correct version in **bold**."
                 )
             case TeacherCorrectionLevel.STRONG:
                 return (
-                    "Tenha uma correção forte: Foco total em precisão. "
-                    "Não deixe nenhum erro passar. Corrija gramática, pontuação e escolha de palavras (collocations). "
-                    "Explique brevemente por que a correção foi feita, mas mantenha o papo natural."
+                    "Strong correction: Full focus on precision. Do not let any mistake pass. "
+                    "Correct grammar, punctuation, and word choices (collocations). Briefly explain "
+                    "the correction, but keep the conversation moving. Use a non-intrusive format like bullet points at the end."
                 )
             case _:
-                return "Mantenha um equilíbrio natural entre conversa e correção."
+                return "Maintain a natural balance between conversation and correction."
+            

@@ -151,4 +151,12 @@ class RedisService(ABC):
     ) -> None:
         
         raise NotImplementedError()
+
+    @abstractmethod
+    def api_user_cached(
+        self,
+        user_id: str,
+    ) -> None:
+        
+        raise NotImplementedError()
     

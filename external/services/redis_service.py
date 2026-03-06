@@ -181,4 +181,11 @@ class RedisServiceImpl(RedisService):
     ) -> None:
         
         self.redis_client.delete(RedisKeyManager.user_message_history(phone=phone))
+        
+    def api_user_cached(
+        self,
+        user_id: str,
+    ) -> str:
+        
+        return self.redis_client.get(RedisKeyManager.api_user_cached(user_id=user_id))
     
