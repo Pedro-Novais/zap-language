@@ -10,11 +10,24 @@ class UserLevelLanguage(StrEnum):
         
         match self:
             case UserLevelLanguage.A1:
-                return "Use frases extremamente simples, presente do indicativo e vocabulário básico. Evite gírias ou phrasal verbs.",
+                return (
+                    "A1 (Beginner): Use extremely simple sentences, present tense, and basic vocabulary. "
+                    "Avoid slang or complex phrasal verbs. If you use a slightly harder word, "
+                    "provide the Portuguese translation in parentheses."
+                )
             case UserLevelLanguage.B2:
-                return "Pode usar termos mais técnicos, phrasal verbs comuns e tempos verbais compostos. Desafie o usuário com expressões idiomáticas."
+                return (
+                    "B2 (Upper-Intermediate): You can use technical terms, common phrasal verbs, and compound tenses. "
+                    "Challenge the student with common idioms and encourage them to use more precise vocabulary."
+                )
             case UserLevelLanguage.C1:
-                return "Fale como um nativo. Use vocabulário sofisticado, nuances culturais e estruturas gramaticais complexas."
+                return (
+                    "C1 (Advanced): Speak like a native. Use sophisticated vocabulary, cultural nuances, "
+                    "and complex grammatical structures. Engage in deep, nuanced discussions."
+                )
             case _:
-                return "Use frases extremamente simples, presente do indicativo e vocabulário básico. Evite gírias ou phrasal verbs."
+                return (
+                    "A1 (Beginner): Use extremely simple sentences, present tense, and basic vocabulary. "
+                    "Avoid slang or complex phrasal verbs."
+                )
             

@@ -11,16 +11,17 @@ class TeacherLanguageDynamics(StrEnum):
         match self:
             case TeacherLanguageDynamics.IMMERSION:
                 return (
-                    "PROIBIDO usar português nas suas explicações. Se o usuário falar em português, "
-                    "reformula a frase dele em inglês: 'Oh, you mean: \"[English sentence]\"' e siga a conversa."
+                    "FORBIDDEN: Do not use Portuguese in your explanations. If the student speaks in Portuguese, "
+                    "simply rephrase their sentence in English: 'Oh, you mean: \"[English sentence]\"' "
+                    "and keep the conversation flowing naturally."
                 )
             case TeacherLanguageDynamics.BILINGUE:
                 return (
-                    "Responda primeiro em inglês. Logo abaixo, forneça uma tradução fluida para o português. "
-                    "Use um separador visual como '--- Tradução:'."
+                    "Always respond in English first. Immediately below, provide a natural translation "
+                    "into Portuguese. Use a clear visual separator like '--- Translation:'."
                 )
             case TeacherLanguageDynamics.SUPPORT:
                 return (
-                    "Fale inglês 90% do tempo. Use o português apenas como último recurso para "
-                    "explicar conceitos que o aluno não entendeu após duas tentativas em inglês."
+                    "Speak English 90% of the time. Use Portuguese only as a last resort "
+                    "to explain concepts the student failed to understand after two attempts in English."
                 )
