@@ -1,11 +1,9 @@
 from typing import List
 
 import pytest
-from unittest.mock import create_autospec
-from datetime import datetime
 from uuid import uuid4
 
-from core.manager.message_history_manager import MessageHistoryManager
+from core.manager.services import MessageHistoryService
 from core.model import MessageHistoryModel
 from core.model.enum import MessageRoleModel
 from core.shared.model import HistoryManagerConfig, SystemConfigModel
@@ -16,7 +14,7 @@ DEFAULT_PHONE = "5511999999999"
 DEFAULT_USER_ID = uuid4()   
 
 
-class TestMessageHistoryManager:
+class TestMessageHistoryService:
 
     @pytest.fixture
     def config_mock(self) -> HistoryManagerConfig:
@@ -30,9 +28,9 @@ class TestMessageHistoryManager:
         config_mock: HistoryManagerConfig, 
         redis_service_mock: RedisService, 
         history_repository_mock: MessageHistoryRepository,
-    ) -> MessageHistoryManager:
+    ) -> MessageHistoryService:
         
-        return MessageHistoryManager(
+        return MessageHistoryService(
             config=config_mock,
             redis_service=redis_service_mock,
             history_repository=history_repository_mock
@@ -40,7 +38,7 @@ class TestMessageHistoryManager:
 
     def test_get_message_history_cache_hit(
         self, 
-        manager: MessageHistoryManager, 
+        manager: MessageHistoryService, 
         redis_service_mock: RedisService, 
         history_repository_mock: MessageHistoryRepository,
     ) -> None:
@@ -65,7 +63,7 @@ class TestMessageHistoryManager:
 
     def test_get_message_history_cache_miss_db_hit(
         self, 
-        manager: MessageHistoryManager, 
+        manager: MessageHistoryService, 
         redis_service_mock: RedisService, 
         history_repository_mock: MessageHistoryRepository,
     ) -> None:
@@ -91,7 +89,7 @@ class TestMessageHistoryManager:
 
     def test_save_messages_calls_repo_and_cache(
         self, 
-        manager: MessageHistoryManager, 
+        manager: MessageHistoryService, 
         redis_service_mock: RedisService, 
         history_repository_mock: MessageHistoryRepository,
     ) -> None:
@@ -120,7 +118,7 @@ class TestMessageHistoryManager:
 
     def test_clear_message_history(
         self, 
-        manager: MessageHistoryManager, 
+        manager: MessageHistoryService, 
         redis_service_mock: RedisService, 
         history_repository_mock: MessageHistoryRepository,        
     ) -> None:

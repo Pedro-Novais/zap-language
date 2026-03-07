@@ -1,7 +1,6 @@
 from loguru import logger
 
-from core.manager.message_history_manager import MessageHistoryManager
-from core.manager.user_manager import UserManager
+from core.manager.services import UserService, MessageHistoryService
 from core.manager.builder import CommandResponseBuilder
 from core.model.enum import (
     CommandTypeGet, 
@@ -14,15 +13,15 @@ class CommandHandler:
     
     def __init__(
         self,
-        user_manager: UserManager,
-        message_history_manager: MessageHistoryManager,
+        user_service: UserService,
+        message_history_service: MessageHistoryService,
     ) -> None:
         
         self.command_to_get = "/"
         self.commando_to_set = "!"
 
-        self.user_manager = user_manager
-        self.message_history_manager = message_history_manager
+        self.user_service = user_service
+        self.message_history_service = message_history_service
     
     def handle_command(
         self, 
@@ -91,8 +90,8 @@ class CommandHandler:
         phone: str,
     ) -> None:
         
-        self.user_manager.invalidate_user_cache(phone=phone)
-        self.message_history_manager.clear_message_history_for_user(phone=phone)
+        self.user_service.invalidate_user_cache(phone=phone)
+        self.message_history_service.clear_message_history_for_user(phone=phone)
     
     def _handle_help_command(
         self, 

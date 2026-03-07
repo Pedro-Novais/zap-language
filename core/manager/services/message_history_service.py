@@ -9,7 +9,7 @@ from core.model import MessageHistoryModel
 from core.model.enum import MessageRoleModel
 
 
-class MessageHistoryManager:
+class MessageHistoryService:
    
     def __init__(
         self, 

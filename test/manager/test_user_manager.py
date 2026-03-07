@@ -2,7 +2,7 @@ import pytest
 import uuid
 from datetime import datetime
 
-from core.manager.user_manager import UserManager
+from core.manager.services import UserService
 from core.interface.repository import UserRepository
 from core.interface.service import RedisService
 from core.model import UserModel
@@ -11,23 +11,23 @@ from core.model import UserModel
 DEFAULT_PHONE = "5511999999999"
 
 
-class TestUserManager:
+class TestUserService:
     
     @pytest.fixture
     def manager(
         self, 
         redis_service_mock: RedisService, 
         user_repository_mock: UserRepository,
-    ) -> UserManager:
+    ) -> UserService:
         
-        return UserManager(
+        return UserService(
             redis_service=redis_service_mock,
             user_repository=user_repository_mock,
         )
 
     def test_get_user_profile_cache_hit(
         self,
-        manager: UserManager, 
+        manager: UserService, 
         redis_service_mock: RedisService, 
         user_repository_mock: UserRepository,
     ) -> None:
@@ -44,7 +44,7 @@ class TestUserManager:
 
     def test_get_user_profile_cache_miss_and_db_hit(
         self,
-        manager: UserManager, 
+        manager: UserService, 
         redis_service_mock: RedisService, 
         user_repository_mock: UserRepository,
     ) -> None:
@@ -65,7 +65,7 @@ class TestUserManager:
 
     def test_get_user_profile_not_found(
         self,
-        manager: UserManager, 
+        manager: UserService, 
         redis_service_mock: RedisService, 
         user_repository_mock: UserRepository,
     ) -> None:
@@ -82,7 +82,7 @@ class TestUserManager:
 
     def test_invalidate_user_cache(
         self,
-        manager: UserManager, 
+        manager: UserService, 
         redis_service_mock: RedisService, 
         ) -> None:
 

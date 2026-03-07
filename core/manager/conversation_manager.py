@@ -7,8 +7,10 @@ from core.shared.errors import (
     UserBannedError,
     AiWithQuotaLimitReachedError,
 )
-from core.manager.message_history_manager import MessageHistoryManager
-from core.manager.user_manager import UserManager
+from core.manager.services import (
+    UserService, 
+    MessageHistoryService,
+)
 from core.manager.command import CommandHandler
 from core.manager.builder import InstructionBuilder
 from core.interface.service import (
@@ -26,15 +28,15 @@ class ConversationManager:
         ai_tutor_service: AITutorService, 
         whatsapp_service: WhatsappService,
         redis_service: RedisService,
-        user_manager: UserManager,
-        message_history_manager: MessageHistoryManager,
+        user_service: UserService,
+        message_history_service: MessageHistoryService,
         command_handler: CommandHandler,
     ) -> None:
         
         self.config = config
 
-        self.user_manager = user_manager
-        self.message_history_manager = message_history_manager
+        self.user_service = user_service
+        self.message_history_service = message_history_service
 
         self.command_handler = command_handler
         
@@ -109,8 +111,8 @@ class ConversationManager:
     ) -> None:
 
         if self.redis_service.has_update_to_user_profile(phone=phone):
-            self.message_history_manager.clear_message_history_for_user(phone=phone)
-            self.user_manager.invalidate_user_cache(phone=phone)
+            self.message_history_service.clear_message_history_for_user(phone=phone)
+            self.user_service.invalidate_user_cache(phone=phone)
             self.redis_service.delete_update_user_profile(phone=phone)
     
     def __respond_to_command(
@@ -141,7 +143,7 @@ class ConversationManager:
             logger.warning(f"Global IA lock is active. Skipping message for {phone} to try again later.")
             raise GlobalIALockError()
     
-        user = self.user_manager.get_user_profile(phone=phone)
+        user = self.user_service.get_user_profile(phone=phone)
         if not user:
             logger.error(f"User not found or whatsapp not enabled, adding to blacklist:{phone}")
             self.__ban_user(phone=phone)
@@ -153,7 +155,7 @@ class ConversationManager:
             self.__ban_user(phone=phone)
             return
         
-        history = self.message_history_manager.get_message_history(
+        history = self.message_history_service.get_message_history(
             user_id=user.id,
             phone=phone,
         )
@@ -162,7 +164,7 @@ class ConversationManager:
             history=history,
             message=message_text,
         )
-        self.message_history_manager.save_messages(
+        self.message_history_service.save_messages(
             user_id=user.id,
             phone=phone,
             user_message=message_text,

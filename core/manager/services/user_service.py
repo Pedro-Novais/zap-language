@@ -7,7 +7,7 @@ from core.interface.service import RedisService
 from core.model import UserModel
 
 
-class UserManager:
+class UserService:
     
     def __init__(
         self, 

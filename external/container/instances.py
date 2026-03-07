@@ -14,8 +14,7 @@ from external.services import (
 from external.container.redis import redis_client
 
 from core.manager import ConversationManager
-from core.manager.user_manager import UserManager
-from core.manager.message_history_manager import MessageHistoryManager
+from core.manager.services import UserService, MessageHistoryService
 from core.manager.command import CommandHandler
 from core.shared.model import SystemConfigModel
 
@@ -43,25 +42,25 @@ def get_conversation_manager() -> ConversationManager:
     
     global conversation_manager
     if conversation_manager is None:
-        message_history_manager = MessageHistoryManager(
+        message_history_service = MessageHistoryService(
             config=system_config.history,
             redis_service=redis_service,
             history_repository=history_repository,
         )
-        user_manager = UserManager(
+        user_service = UserService(
             redis_service=redis_service,
             user_repository=user_repository,
         )
         
         command_handler = CommandHandler(
-            user_manager=user_manager,
-            message_history_manager=message_history_manager,
+            user_service=user_service,
+            message_history_service=message_history_service,
         )
         
         return ConversationManager(
             config=system_config.conversation,
-            user_manager=user_manager,
-            message_history_manager=message_history_manager,
+            user_service=user_service,
+            message_history_service=message_history_service,
             ai_tutor_service=ai_tutor_service, 
             whatsapp_service=whatsapp_service,
             command_handler=command_handler,
