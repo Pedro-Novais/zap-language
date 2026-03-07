@@ -40,3 +40,9 @@ class User(Base):
         back_populates="user", 
         cascade="all, delete-orphan",
     )
+    sessions: Mapped[list["ConversationSession"]] = relationship(
+        "ConversationSession", 
+        back_populates="user", 
+        cascade="all, delete-orphan"
+    )
+    created_scenarios: Mapped[List["ScenarioContext"]] = relationship("ScenarioContext", back_populates="creator")

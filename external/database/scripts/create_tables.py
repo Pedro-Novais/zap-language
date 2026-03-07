@@ -11,6 +11,9 @@ from external.database.models import Subscription
 from external.database.models import MessageHistory
 from external.database.models import PhoneVerification
 from external.database.models import SystemConfig
+from external.database.models import ConversationSession
+from external.database.models import ScenarioContext
+
 
 
 def create_tables():

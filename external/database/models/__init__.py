@@ -5,3 +5,5 @@ from ._User import User
 from ._MessageHistory import MessageHistory
 from ._PhoneVerification import PhoneVerification
 from ._SystemConfig import SystemConfig
+from ._ConversationSession import ConversationSession
+from ._ScenarioContext import ScenarioContext
