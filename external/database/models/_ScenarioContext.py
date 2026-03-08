@@ -49,4 +49,7 @@ class ScenarioContext(Base):
     )
 
     creator: Mapped["User"] = relationship("User", back_populates="created_scenarios")
-    sessions: Mapped[List["ConversationSession"]] = relationship("ConversationSession", back_populates="scenario")
+    sessions: Mapped[List["ConversationSession"]] = relationship(
+        "ConversationSession", 
+        back_populates="scenario"
+    )

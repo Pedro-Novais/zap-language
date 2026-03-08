@@ -10,3 +10,4 @@ from .command_type import (
     CommandTypeGet,
 )
 from .conversation_session_status import ConversationSessionsState
+from .conversation_session_type import ConversationSessionsType

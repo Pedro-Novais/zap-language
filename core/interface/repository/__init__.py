@@ -3,3 +3,4 @@ from .phone_verification_repository import PhoneVerificationRepository
 from .study_settings_repository import StudySettingsRepository
 from .message_history_repository import MessageHistoryRepository
 from .system_config_repository import SystemConfigRepository
+from .conversation_session_repository import ConversationSessionRepository

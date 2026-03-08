@@ -189,3 +189,18 @@ class RedisServiceImpl(RedisService):
         
         return self.redis_client.get(RedisKeyManager.api_user_cached(user_id=user_id))
     
+    def set_conversation_session(
+        self,
+        phone: str,
+        session: str,
+    ) -> None:
+        
+        raise NotImplementedError()
+    
+    def get_conversation_session(
+        self,
+        phone: str,
+    ) -> None:
+        
+        raise NotImplementedError()
+    

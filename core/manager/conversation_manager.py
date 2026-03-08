@@ -10,6 +10,7 @@ from core.shared.errors import (
 from core.manager.services import (
     UserService, 
     MessageHistoryService,
+    ConversationSessionService,
 )
 from core.manager.command import CommandHandler
 from core.manager.builder import InstructionBuilder
@@ -31,6 +32,7 @@ class ConversationManager:
         user_service: UserService,
         message_history_service: MessageHistoryService,
         command_handler: CommandHandler,
+        conversation_session_service: ConversationSessionService,
     ) -> None:
         
         self.config = config
@@ -43,6 +45,7 @@ class ConversationManager:
         self.ai_tutor_service = ai_tutor_service
         self.whatsapp_service = whatsapp_service
         self.redis_service = redis_service
+        self.conversation_session_service = conversation_session_service
 
         self.instruction_builder = InstructionBuilder()
 

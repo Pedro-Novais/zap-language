@@ -160,3 +160,20 @@ class RedisService(ABC):
         
         raise NotImplementedError()
     
+    @abstractmethod
+    def set_conversation_session(
+        self,
+        phone: str,
+        session: str,
+    ) -> None:
+        
+        raise NotImplementedError()
+    
+    @abstractmethod
+    def get_conversation_session(
+        self,
+        phone: str,
+    ) -> None:
+        
+        raise NotImplementedError()
+    

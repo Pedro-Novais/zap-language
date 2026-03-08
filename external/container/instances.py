@@ -4,6 +4,7 @@ from external.repositories import (
     PhoneVerificationRepositoryImpl,
     StudySettingsRepositoryImpl,
     SystemConfigRepositoryImpl,
+    ConversationSessionRepositoryImpl,
 )
 from external.services import (
     ZApiService,
@@ -14,7 +15,11 @@ from external.services import (
 from external.container.redis import redis_client
 
 from core.manager import ConversationManager
-from core.manager.services import UserService, MessageHistoryService
+from core.manager.services import (
+    UserService, 
+    MessageHistoryService, 
+    ConversationSessionService,
+)
 from core.manager.command import CommandHandler
 from core.shared.model import SystemConfigModel
 
@@ -24,6 +29,7 @@ history_repository = MessageHistoryRepositoryImpl()
 phone_verification_repository = PhoneVerificationRepositoryImpl()
 study_settings_repository = StudySettingsRepositoryImpl()
 system_config_repository = SystemConfigRepositoryImpl()
+conversation_session_repo = ConversationSessionRepositoryImpl()
 
 system_config_model = SystemConfigModel(configs=system_config_repository.get_configurations())
 system_config = system_config_model.get_system_config()
@@ -51,7 +57,11 @@ def get_conversation_manager() -> ConversationManager:
             redis_service=redis_service,
             user_repository=user_repository,
         )
-        
+        conversation_session_service = ConversationSessionService(
+            redis_service=redis_service,
+            conversation_session_repo=conversation_session_repo,
+        )
+
         command_handler = CommandHandler(
             user_service=user_service,
             message_history_service=message_history_service,
@@ -65,6 +75,7 @@ def get_conversation_manager() -> ConversationManager:
             whatsapp_service=whatsapp_service,
             command_handler=command_handler,
             redis_service=redis_service,
+            conversation_session_service=conversation_session_service,
         )
     
     return conversation_manager
