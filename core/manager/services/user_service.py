@@ -36,12 +36,22 @@ class UserService:
         if not user_profile:
             logger.error(f"User not found for phone: {phone}")
             return None
+        
+        self.set_user_profile_in_cache(phone=phone, user_profile=user_profile)
+        return user_profile
 
+    def set_user_profile_in_cache(
+        self, 
+        phone: str,
+        user_profile: UserModel,
+    ) -> None:
+        
+        logger.info(f"Setting user profile in cache for {phone}")
+        
         self.redis_service.set_user_profile(
             phone=phone,
             user_profile=user_profile.model_dump_json(),
         )
-        return user_profile
 
     def invalidate_user_cache(
         self, 

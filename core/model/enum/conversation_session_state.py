@@ -3,6 +3,8 @@ from enum import StrEnum
 
 class ConversationSessionsState(StrEnum):
     
+    INITIALIZED = "initialized"
+    EXAM = "exam"
     AWAITING_DEFINITION = "awaiting_definition"
     PRACTICING = "practicing"
     COMPLETED = "completed"

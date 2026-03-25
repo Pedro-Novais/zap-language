@@ -1,7 +1,15 @@
 from abc import ABC, abstractmethod
 from typing import Optional
+from uuid import UUID
 
-from core.model import ConversationSessionModel
+from core.model import (
+    ConversationSessionModel,
+    ScenarioModel,
+)
+from core.model.enum import (
+    ConversationSessionsType,
+    ConversationSessionsState,
+)
 
 
 class ConversationSessionRepository(ABC):
@@ -27,5 +35,27 @@ class ConversationSessionRepository(ABC):
         self, 
         session_id: str,
     ) -> None:
+        
+        raise NotImplementedError()
+    
+    @abstractmethod
+    def set_session_state(
+        self, 
+        session_id: str,
+        state: ConversationSessionsState,
+    ) -> ConversationSessionModel:
+        
+        raise NotImplementedError()
+    
+    @abstractmethod
+    def update_session(
+        self, 
+        session_id: UUID,
+        scenario: Optional[ScenarioModel] = None,
+        status: Optional[ConversationSessionsState] = None,
+        session_type: Optional[ConversationSessionsType] = None,
+        context_summary: Optional[str] = None,
+        context_description: Optional[str] = None,
+    ) -> ConversationSessionModel:
         
         raise NotImplementedError()

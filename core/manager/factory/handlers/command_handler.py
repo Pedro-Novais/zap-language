@@ -1,36 +1,46 @@
 from loguru import logger
 
-from core.manager.factory import ConversationHandler
+from core.manager.factory.handlers import ConversationHandler
+from core.manager.factory.handlers.conversation_handler import CommandHandlerMixin
 from core.manager.services import UserService, MessageHistoryService
 from core.manager.builder import CommandResponseBuilder
+from core.manager.services.conversation_session_service import ConversationSessionService
 from core.model.enum import (
-    CommandTypeGet, 
+    CommandType, 
     CommandTypeSet,
+    ConversationSessionsState,
 )
 from core.model import ConversationSessionModel
+from core.model.user_model import UserModel
 from core.shared.errors import CommandDoesNotExistError
 
 
-class CommandHandler(ConversationHandler):
+class CommandHandler(
+    ConversationHandler, 
+    CommandHandlerMixin,
+):
     
     def __init__(
         self,
         user_service: UserService,
         message_history_service: MessageHistoryService,
+        session_service: ConversationSessionService,
     ) -> None:
         
-        self.command_to_get = "/"
+        self.start_command = "/"
         self.commando_to_set = "!"
 
         self.user_service = user_service
+        self.session_service = session_service
         self.message_history_service = message_history_service
-    
-    def process_message(
+
+    def reply_message(
         self, 
+        user: UserModel,
         phone: str, 
         message: str,
         session: ConversationSessionModel,
-    ) -> None:
+    ) -> str:
         
         try:
             logger.info(f"Verifying command message for {phone}")
@@ -42,10 +52,11 @@ class CommandHandler(ConversationHandler):
                     command=command,
                 )
             
-            if message.startswith(self.command_to_get):
-                command = message[len(self.command_to_get):].strip().lower()
-                return self._handle_get_command(
+            if message.startswith(self.start_command):
+                command = message[len(self.start_command):].strip().lower()
+                return self.__handle_command(
                     phone=phone, 
+                    session=session,
                     command=command,
                 )
             
@@ -62,14 +73,7 @@ class CommandHandler(ConversationHandler):
         message: str,
     ) -> bool:
         
-        return message.startswith(self.commando_to_set) or message.startswith(self.command_to_get)
-
-    def is_a_scenario_command(
-        self, 
-        command: str,
-    ) -> bool:
-        
-        return command == CommandTypeSet.SCENARIO.value
+        return message.startswith(self.commando_to_set) or message.startswith(self.start_command)
     
     def _handle_set_command(
         self, 
@@ -79,23 +83,30 @@ class CommandHandler(ConversationHandler):
         
         if command == CommandTypeSet.RESET.value:
             logger.info(f"[RESET] command received for {phone}")
-            self._handle_reset_command(phone=phone)
+            self.__handle_reset_command(phone=phone)
             return CommandResponseBuilder.response_for_reset_command()
         
         raise CommandDoesNotExistError()
     
-    def _handle_get_command(
+    def __handle_command(
         self, 
         phone: str,
         command: str,
+        session: ConversationSessionModel,
     ) -> None:
         
-        if command == CommandTypeGet.HELP.value:
-            return self._handle_help_command()
+        if command == CommandType.HELP.value:
+            return self.__handle_help_command()
+        
+        if command == CommandType.END_SESSION.value:
+            return self.__handle_end_session_command(
+                phone=phone,
+                session=session,
+            )
         
         raise CommandDoesNotExistError()
         
-    def _handle_reset_command(
+    def __handle_reset_command(
         self, 
         phone: str,
     ) -> None:
@@ -103,8 +114,22 @@ class CommandHandler(ConversationHandler):
         self.user_service.invalidate_user_cache(phone=phone)
         self.message_history_service.clear_message_history_for_user(phone=phone)
     
-    def _handle_help_command(
+    def __handle_end_session_command(
         self, 
+        phone: str,
+        session: ConversationSessionModel,
+    ) -> str:
+        
+        logger.info(f"[END SESSION] command received for {phone}")
+        self.session_service.set_session_state(
+            phone=phone,
+            session_id=session.id,
+            state=ConversationSessionsState.CANCELLED_BY_USER,
+        )
+        return CommandResponseBuilder.response_for_end_session_command()
+    
+    @staticmethod
+    def __handle_help_command(
     ) -> str:
         
         return CommandResponseBuilder.response_for_help_command()

@@ -20,16 +20,7 @@ from core.manager.services import (
     UserService, 
     MessageHistoryService,
 )
-from core.manager.builder import InstructionBuilder
-from core.manager.command import CommandHandler
 
-
-@pytest.fixture
-def command_handler_mock():
-    return create_autospec(
-        spec=CommandHandler, 
-        instance=True,
-    )
 
 @pytest.fixture
 def history_repository_mock():
@@ -84,12 +75,5 @@ def user_repository_mock():
 def phone_verification_repository_mock():
     return create_autospec(
         spec=PhoneVerificationRepository, 
-        instance=True,
-    )
-
-@pytest.fixture
-def instruction_builder_mock():
-    return create_autospec(
-        spec=InstructionBuilder, 
         instance=True,
     )

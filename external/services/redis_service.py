@@ -1,4 +1,5 @@
 from typing import Optional
+from loguru import logger
 
 import redis
 
@@ -42,6 +43,7 @@ class RedisServiceImpl(RedisService):
         phone: str,
     ) -> None:
         
+        logger.info(f"[RedisService] Deleting update to user profile for {phone}")
         self.redis_client.delete(RedisKeyManager.update_user_profile(phone=phone))
     
     def has_lock_global_ia( 
@@ -113,6 +115,7 @@ class RedisServiceImpl(RedisService):
         phone: str,
     ) -> None:
         
+        logger.info(f"[RedisService] Deleting processing phone for {phone}")
         self.redis_client.delete(RedisKeyManager.processing_phone(phone=phone))
         
     def ban_phone(
@@ -195,12 +198,24 @@ class RedisServiceImpl(RedisService):
         session: str,
     ) -> None:
         
-        raise NotImplementedError()
+        # TODO - Create a timeout config
+        self.redis_client.set(
+            name=RedisKeyManager.conversation_session(phone=phone), 
+            ex=120, 
+            value=session,
+        )
     
     def get_conversation_session(
         self,
         phone: str,
     ) -> None:
         
-        raise NotImplementedError()
+        return self.redis_client.get(RedisKeyManager.conversation_session(phone=phone))
+    
+    def delete_conversation_session(
+        self,
+        phone: str,
+    ) -> None:
+        
+        self.redis_client.delete(RedisKeyManager.conversation_session(phone=phone))
     

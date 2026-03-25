@@ -4,3 +4,4 @@ from .user_settings_repository_impl import StudySettingsRepositoryImpl
 from .message_history_repository_impl import MessageHistoryRepositoryImpl
 from .system_config_repository_impl import SystemConfigRepositoryImpl
 from .conversation_session_repository_impl import ConversationSessionRepositoryImpl
+from .scenario_repository_impl import ScenarioRepositoryImpl

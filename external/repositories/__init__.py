@@ -5,4 +5,5 @@ from .supabase import (
     MessageHistoryRepositoryImpl,
     SystemConfigRepositoryImpl,
     ConversationSessionRepositoryImpl,
+    ScenarioRepositoryImpl,
 )

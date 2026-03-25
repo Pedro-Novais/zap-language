@@ -114,7 +114,7 @@ class StudySettingsInteractor:
         
         result = None
         if not language_dynamics:
-            result = TeacherLanguageDynamics.SUPPORT
+            result = TeacherLanguageDynamics.BILINGUE
             
         if language_dynamics == "immersion":
             result = TeacherLanguageDynamics.IMMERSION

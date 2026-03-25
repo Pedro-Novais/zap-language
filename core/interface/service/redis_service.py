@@ -177,3 +177,11 @@ class RedisService(ABC):
         
         raise NotImplementedError()
     
+    @abstractmethod
+    def delete_conversation_session(
+        self,
+        phone: str,
+    ) -> None:
+        
+        raise NotImplementedError()
+    

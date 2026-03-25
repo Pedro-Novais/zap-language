@@ -1,2 +1,1 @@
-from .instruction_builder import InstructionBuilder
 from .command_response_builder import CommandResponseBuilder

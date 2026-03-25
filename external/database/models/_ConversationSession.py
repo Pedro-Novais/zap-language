@@ -33,13 +33,13 @@ class ConversationSession(Base):
     
     session_type: Mapped[ConversationSessionsType] = mapped_column(
         Enum(ConversationSessionsType), 
-        default=ConversationSessionsType.FREE_TALK,
+        default=ConversationSessionsType.UNDEFINED,
         nullable=False
     )
     
     status: Mapped[ConversationSessionsState] = mapped_column(
         Enum(ConversationSessionsState), 
-        default=ConversationSessionsState.UNDEFINED,
+        default=ConversationSessionsState.INITIALIZED,
     )
 
     context_description: Mapped[str] = mapped_column(Text, nullable=True)
@@ -49,8 +49,18 @@ class ConversationSession(Base):
 
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
     
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, 
+        server_default=func.now(), # Valor default no nível do BANCO
+        nullable=False
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, 
+        server_default=func.now(), 
+        onupdate=func.now(),       # Atualiza no Python sempre que houver update
+        nullable=False
+    )
 
     user: Mapped["User"] = relationship("User", back_populates="sessions")
     messages: Mapped[List["MessageHistory"]] = relationship("MessageHistory", back_populates="session", cascade="all, delete-orphan")

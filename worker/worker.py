@@ -9,9 +9,8 @@ from external.container import (
 )
 
 from core.shared.errors import (
-    AiWithQuotaLimitReachedError, 
-    ErrorSendingMessageToWhatsapp,
-    GlobalIALockError,
+    RetryWhitoutCountAttempt,
+    RetryCountAttempt,
 )
 from core.shared.model import CeleryConfig
 
@@ -41,13 +40,10 @@ def process_whatsapp_message(
         )
         logger.info(f"Message from {phone} processed successfully.")
     
-    except (
-        AiWithQuotaLimitReachedError, 
-        ErrorSendingMessageToWhatsapp,
-    ) as exc:
+    except RetryCountAttempt as exc:
         raise self.retry(exc=exc)
     
-    except GlobalIALockError as exc:
+    except RetryWhitoutCountAttempt as exc:
         raise self.retry(
             count_retries=False,
             countdown=config.timeout_to_message_lock_by_ai, 
