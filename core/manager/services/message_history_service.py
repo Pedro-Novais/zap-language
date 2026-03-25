@@ -1,7 +1,11 @@
-from typing import List, Dict
+from typing import (
+    List, 
+    Dict,
+)
 
 from loguru import logger
 
+from core.model.conversation_session_model import ConversationSessionModel
 from core.shared.model import HistoryManagerConfig
 from core.interface.repository import MessageHistoryRepository
 from core.interface.service import RedisService
@@ -9,7 +13,7 @@ from core.model import MessageHistoryModel
 from core.model.enum import MessageRoleModel
 
 
-class MessageHistoryManager:
+class MessageHistoryService:
    
     def __init__(
         self, 
@@ -27,6 +31,7 @@ class MessageHistoryManager:
         self, 
         user_id: str,
         phone: str,
+        session: ConversationSessionModel,
     ) -> List[MessageHistoryModel]:
         
         logger.info(f"Getting message history for {phone}")
@@ -39,6 +44,7 @@ class MessageHistoryManager:
         logger.info(f"Cache miss to {phone}. Getting message histories from database")
         message_history_db = self.history_repository.get_messages(
             user_id=user_id, 
+            session_id=session.id,
             limit=self.config.limit_message_from_history,
         )
         if message_history_db:
@@ -56,6 +62,7 @@ class MessageHistoryManager:
         phone: str, 
         user_message: str,
         tutor_message: str,
+        session: ConversationSessionModel,
     ) -> None:
         
         logger.info(f"Saving new messages for {phone}")
@@ -67,6 +74,7 @@ class MessageHistoryManager:
         )
         message_update = self.history_repository.insert_messages(
             user_id=user_id, 
+            session_id=session.id,
             messages=message_models,
         )
         self._add_to_cache(
@@ -82,7 +90,7 @@ class MessageHistoryManager:
         logger.info(f"Clearing message history for {phone}")
         
         self.redis_service.delete_message_history(phone=phone)
-        self.history_repository.invalidate_messages(phone=phone)
+        self.history_repository.invalidate_messages_by_phone(phone=phone)
 
     def _add_to_cache(
         self, 

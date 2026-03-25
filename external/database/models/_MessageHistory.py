@@ -34,6 +34,10 @@ class MessageHistory(Base):
         ForeignKey("users.id", ondelete="CASCADE"), 
         nullable=False
     )
+    session_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("conversation_sessions.id", ondelete="CASCADE"), 
+        nullable=False
+    )
     role: Mapped[MessageRoleModel] = mapped_column(Enum(MessageRoleModel), default=MessageRoleModel.USER)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     is_allowed: Mapped[bool] = mapped_column(
@@ -47,5 +51,7 @@ class MessageHistory(Base):
         DateTime,
         default=lambda: datetime.now(timezone.utc),
     )
+    
+    session: Mapped["ConversationSession"] = relationship("ConversationSession", back_populates="messages")
     user: Mapped["User"] = relationship("User", back_populates="messages")
     

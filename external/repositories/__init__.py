@@ -4,4 +4,6 @@ from .supabase import (
     StudySettingsRepositoryImpl,
     MessageHistoryRepositoryImpl,
     SystemConfigRepositoryImpl,
+    ConversationSessionRepositoryImpl,
+    ScenarioRepositoryImpl,
 )

@@ -22,9 +22,9 @@ from core.interface.service import (
     WhatsappService,
     RedisService,
 )
-from core.manager import (
-    UserManager,
-    MessageHistoryManager,
+from core.manager.services import (
+    UserService, 
+    MessageHistoryService,
 )
 from core.manager.command import CommandHandler
 from core.shared.model import (
@@ -55,8 +55,8 @@ class TestConversationManager:
         redis_service_mock: RedisService,
         ai_tutor_service_mock: AITutorService,
         whatsapp_service_mock: WhatsappService,
-        user_manager_mock: UserManager,
-        message_history_manager_mock: MessageHistoryManager,
+        user_service_mock: UserService,
+        message_history_service_mock: MessageHistoryService,
         config_mock: ConversationManagerConfig,
         command_handler_mock: CommandHandler,
     ) -> ConversationManager:
@@ -64,8 +64,8 @@ class TestConversationManager:
         return ConversationManager(
             ai_tutor_service=ai_tutor_service_mock,
             whatsapp_service=whatsapp_service_mock,
-            user_manager=user_manager_mock,
-            message_history_manager=message_history_manager_mock,
+            user_service=user_service_mock,
+            message_history_service=message_history_service_mock,
             redis_service=redis_service_mock,
             config=config_mock,
             command_handler=command_handler_mock,
@@ -92,8 +92,8 @@ class TestConversationManager:
         self, 
         manager: ConversationManager, 
         redis_service_mock: RedisService, 
-        message_history_manager_mock: MessageHistoryManager, 
-        user_manager_mock: UserManager,
+        message_history_service_mock: MessageHistoryService, 
+        user_service_mock: UserService,
     ) -> None:
 
         redis_service_mock.user_is_banned.return_value = False
@@ -101,8 +101,8 @@ class TestConversationManager:
 
         manager.process_incoming_message(phone=DEFAULT_PHONE, message="Olá")
 
-        message_history_manager_mock.clear_message_history_for_user.assert_called_once_with(phone=DEFAULT_PHONE)
-        user_manager_mock.invalidate_user_cache.assert_called_once_with(phone=DEFAULT_PHONE)
+        message_history_service_mock.clear_message_history_for_user.assert_called_once_with(phone=DEFAULT_PHONE)
+        user_service_mock.invalidate_user_cache.assert_called_once_with(phone=DEFAULT_PHONE)
         redis_service_mock.delete_update_user_profile.assert_called_once_with(phone=DEFAULT_PHONE)
 
     def test_process_message_as_command_success(
@@ -171,10 +171,10 @@ class TestConversationManager:
         manager: ConversationManager, 
         redis_service_mock: RedisService, 
         command_handler_mock: CommandHandler, 
-        user_manager_mock: UserManager, 
+        user_service_mock: UserService, 
         ai_tutor_service_mock: AITutorService, 
         whatsapp_service_mock: WhatsappService, 
-        message_history_manager_mock: MessageHistoryManager,
+        message_history_service_mock: MessageHistoryService,
     ) -> None:
         
         tutor_message_response = "Resposta do Tutor"
@@ -184,7 +184,7 @@ class TestConversationManager:
         redis_service_mock.has_lock_global_ia.return_value = False
 
         user_model = get_user_model(study_settings=get_study_settings_model())
-        user_manager_mock.get_user_profile.return_value = user_model
+        user_service_mock.get_user_profile.return_value = user_model
         
         ai_tutor_service_mock.get_tutor_response.return_value = tutor_message_response
 
@@ -198,7 +198,7 @@ class TestConversationManager:
             phone=DEFAULT_PHONE, 
             message=tutor_message_response,
         )
-        message_history_manager_mock.save_messages.assert_called_once()
+        message_history_service_mock.save_messages.assert_called_once()
         
         redis_service_mock.delete_processing_phone.assert_called_once_with(phone=DEFAULT_PHONE)
         redis_service_mock.set_lock_global_ia.assert_called_once()
@@ -227,7 +227,7 @@ class TestConversationManager:
         manager: ConversationManager, 
         redis_service_mock: RedisService, 
         command_handler_mock: CommandHandler, 
-        user_manager_mock: UserManager, 
+        user_service_mock: UserService, 
         ai_tutor_service_mock: AITutorService,
     ) -> None:
 
@@ -236,7 +236,7 @@ class TestConversationManager:
         redis_service_mock.user_is_banned.return_value = False
         redis_service_mock.has_lock_global_ia.return_value = False
         command_handler_mock.is_command.return_value = False
-        user_manager_mock.get_user_profile.return_value = user_model
+        user_service_mock.get_user_profile.return_value = user_model
         ai_tutor_service_mock.get_tutor_response.side_effect = AiWithQuotaLimitReachedError()
 
         with pytest.raises(AiWithQuotaLimitReachedError):
@@ -250,13 +250,13 @@ class TestConversationManager:
         manager: ConversationManager, 
         redis_service_mock: RedisService, 
         command_handler_mock: CommandHandler, 
-        user_manager_mock: UserManager,
+        user_service_mock: UserService,
     ) -> None:
         
         redis_service_mock.user_is_banned.return_value = False
         command_handler_mock.is_command.return_value = False
         redis_service_mock.has_lock_global_ia.return_value = False
-        user_manager_mock.get_user_profile.return_value = None
+        user_service_mock.get_user_profile.return_value = None
 
         manager.process_incoming_message(
             phone=DEFAULT_PHONE, 

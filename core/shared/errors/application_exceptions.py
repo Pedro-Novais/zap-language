@@ -27,7 +27,7 @@ class EmailAlreadyExistsError(ApplicationError):
         super().__init__(
             message_error=f"Email '{email}' já está em uso",
             status_code=409,
-            )
+        )
         
 
 class MissingRequiredFieldError(ApplicationError):
@@ -39,7 +39,7 @@ class MissingRequiredFieldError(ApplicationError):
         super().__init__(
             message_error=f"Missing required field",
             status_code=400,
-            )
+        )
         
 
 class UnhandledConfigurationValueError(ApplicationError):
@@ -51,7 +51,7 @@ class UnhandledConfigurationValueError(ApplicationError):
         super().__init__(
             message_error=f"Foram enviados valores não tratados para a configuração",
             status_code=406,
-            )
+        )
         
 
 class UserNotFoundError(ApplicationError):
@@ -64,7 +64,7 @@ class UserNotFoundError(ApplicationError):
         super().__init__(
             message_error=f"Email: '{email}' não está cadastrado!",
             status_code=404,
-            )
+        )
 
 
 class IncorrectPasswordProvidedError(ApplicationError):
@@ -76,7 +76,7 @@ class IncorrectPasswordProvidedError(ApplicationError):
         super().__init__(
             message_error="Senha fornecida está incorreta",
             status_code=401,
-            )
+        )
         
 
 class ErrorSendingMessageToWhatsapp(ApplicationError):
@@ -90,7 +90,7 @@ class ErrorSendingMessageToWhatsapp(ApplicationError):
             message_error="Erro enviando mensagem para o Whatsapp",
             status_code=502,
             extra={"original_error": str(error)},
-            )
+        )
 
 
 class ExternalServiceError(ApplicationError):
@@ -104,7 +104,7 @@ class ExternalServiceError(ApplicationError):
             message_error="Erro de comunicação com serviço externo",
             status_code=502,
             extra={"original_error": str(error)},
-            )
+        )
        
 
 class InvalidPhoneNumberError(ApplicationError):
@@ -116,7 +116,7 @@ class InvalidPhoneNumberError(ApplicationError):
         super().__init__(
             message_error="Número de telefone inválido",
             status_code=400,
-            )
+        )
         
 class InvalidVerificationCodeError(ApplicationError):
 
@@ -127,7 +127,7 @@ class InvalidVerificationCodeError(ApplicationError):
         super().__init__(
             message_error="Código fornecido inválido",
             status_code=400,
-            )
+        )
         
 class MaxAttemptsReachedError(ApplicationError):
 
@@ -138,7 +138,7 @@ class MaxAttemptsReachedError(ApplicationError):
         super().__init__(
             message_error="Número máximo de tentativas atingido",
             status_code=400,
-            )
+        )
         
 class UserAlreadyHasPhoneNumberError(ApplicationError):
 
@@ -149,7 +149,7 @@ class UserAlreadyHasPhoneNumberError(ApplicationError):
         super().__init__(
             message_error="Usuário já possui um número de telefone",
             status_code=400,
-            )
+        )
         
 class NoVerificationCodeWasGeneratedError(ApplicationError):
 
@@ -160,7 +160,7 @@ class NoVerificationCodeWasGeneratedError(ApplicationError):
         super().__init__(
             message_error="Nenhum código de verificação foi gerado para o usuário",
             status_code=400,
-            )
+        )
         
 class CodeExpiredError(ApplicationError):
 
@@ -171,50 +171,4 @@ class CodeExpiredError(ApplicationError):
         super().__init__(
             message_error="Código de verificação expirado",
             status_code=400,
-            )
-        
-class AiWithQuotaLimitReachedError(ApplicationError):
-
-    def __init__(
-        self,
-    ) -> None:
-            
-        super().__init__(
-            message_error="Limite de cota da IA foi atingido",
-            status_code=502,
-            )
-        
-        
-class CommandDoesNotExistError(ApplicationError):
-
-    def __init__(
-        self,
-    ) -> None:
-            
-        super().__init__(
-            message_error="Comando não encontrado ou não tratado",
-            status_code=404,
-            )
-        
-class GlobalIALockError(ApplicationError):
-
-    def __init__(
-        self,
-    ) -> None:
-            
-        super().__init__(
-            message_error="IA está bloqueada globalmente",
-            status_code=400,
-            )
-        
-class UserBannedError(ApplicationError):
-
-    def __init__(
-        self,
-    ) -> None:
-            
-        super().__init__(
-            message_error="Usuário bloqueado",
-            status_code=400,
-            )
-    
+        )

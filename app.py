@@ -21,6 +21,8 @@ from external.database.models import(
     Plan,
     MessageHistory,
     SystemConfig,
+    ConversationSession,
+    ScenarioContext,
 )
 
 logger.remove()

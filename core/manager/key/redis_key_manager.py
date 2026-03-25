@@ -65,3 +65,11 @@ class RedisKeyManager:
         
         return f"{cls.PREFIX_API}:user_cached:{user_id}"
     
+    @classmethod
+    def conversation_session(
+        cls, 
+        phone: str,
+    ) -> str:
+        
+        return f"{cls.PREFIX_WORKER}:conversation_session:{phone}"
+    

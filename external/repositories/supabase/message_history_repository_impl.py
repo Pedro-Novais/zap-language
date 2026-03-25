@@ -24,16 +24,23 @@ class MessageHistoryRepositoryImpl(MessageHistoryRepository):
         self,
         user_id: str,
         limit: int,
+        session_id: str,
         messages_from_the_last_hours: int = 5,
     ) -> List[MessageHistoryModel]:
         
         time_threshold = datetime.now(tz=timezone.utc) - timedelta(hours=messages_from_the_last_hours)
         with get_db_session() as session:
-            messages = session.query(MessageHistory).filter(
-                MessageHistory.user_id == user_id,
-                MessageHistory.is_allowed == True,
-                MessageHistory.created_at >= time_threshold,
-            ).order_by(MessageHistory.created_at.asc()).limit(limit).all()
+            messages = (
+                session.query(MessageHistory)
+                .filter(
+                    MessageHistory.session_id == session_id,
+                    MessageHistory.is_allowed == True,
+                    MessageHistory.created_at >= time_threshold,
+                )
+                .order_by(MessageHistory.created_at.asc())
+                .limit(limit)
+                .all()
+            )
             
             response = []
             for message in messages:
@@ -44,6 +51,7 @@ class MessageHistoryRepositoryImpl(MessageHistoryRepository):
     def insert_messages(
         self,
         user_id: str,
+        session_id: str,
         messages: List[MessageHistoryModel],
     ) -> List[MessageHistoryModel]:
         
@@ -53,6 +61,7 @@ class MessageHistoryRepositoryImpl(MessageHistoryRepository):
                 message = MessageHistory(
                     user_id=user_id,
                     role=message.role,
+                    session_id=session_id,
                     content=message.content,
                 )
                 message_db_instances.append(message)
@@ -65,7 +74,7 @@ class MessageHistoryRepositoryImpl(MessageHistoryRepository):
             
             return [self._transform_message_data_in_message_model(message=db_msg) for db_msg in message_db_instances]
         
-    def invalidate_messages(
+    def invalidate_messages_by_phone(
         self,
         phone: str,
     ) -> None:
@@ -83,7 +92,22 @@ class MessageHistoryRepositoryImpl(MessageHistoryRepository):
                 {"is_allowed": False}, 
                 synchronize_session=False
             )
-            
+            session.commit()
+            return
+    
+    def invalidate_messages_by_session(
+        self,
+        session_id: str,
+    ) -> None:
+        
+        with get_db_session() as session:
+            session.query(MessageHistory).filter(
+                MessageHistory.session_id == session_id,
+                MessageHistory.is_allowed == True
+            ).update(
+                {"is_allowed": False}, 
+                synchronize_session=False
+            )
             session.commit()
             return
     

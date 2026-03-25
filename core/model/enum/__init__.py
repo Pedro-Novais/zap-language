@@ -7,5 +7,7 @@ from .system_config_key import SystemConfigKey
 from .user_level_language import UserLevelLanguage
 from .command_type import (
     CommandTypeSet,
-    CommandTypeGet,
+    CommandType,
 )
+from .conversation_session_state import ConversationSessionsState
+from .conversation_session_type import ConversationSessionsType
