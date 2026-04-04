@@ -2,7 +2,7 @@ from uuid import UUID
 from datetime import datetime, timezone
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator, Field
 
 from core.model import StudySettingsModel
 
@@ -17,7 +17,7 @@ class UserModel(BaseModel):
     whatsapp_enabled: bool
     created_at: datetime
     study_settings: Optional[StudySettingsModel] = None
-    password: str
+    password: str = Field(exclude=True)
     current_topic: str | None = None
     
     @field_validator("created_at", mode="after")

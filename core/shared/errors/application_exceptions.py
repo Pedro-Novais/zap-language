@@ -58,11 +58,11 @@ class UserNotFoundError(ApplicationError):
 
     def __init__(
         self, 
-        email: str,
+        email: str = None,
     ) -> None:
             
         super().__init__(
-            message_error=f"Email: '{email}' não está cadastrado!",
+            message_error=f"Usuário não possui cadastro",
             status_code=404,
         )
 

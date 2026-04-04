@@ -1,4 +1,4 @@
-from flask import Flask, app
+from flask import Flask, app, jsonify
 
 from external.utils.error_handled_request import register_error_handlers
 from external.routes.user_routes import UserRoute
@@ -35,6 +35,11 @@ class Routes:
     def build_routes(
         self,
     ) -> None:
+
+        # Health check endpoint sem autenticação para testar CORS
+        @self.app.route('/api/health', methods=['GET'])
+        def health_check():
+            return jsonify({"status": "ok", "message": "API is running"}), 200
 
         self.user_route.register_routes()
         self.zapi_route.register_routes()

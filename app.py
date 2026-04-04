@@ -38,14 +38,8 @@ migrate = Migrate(app, db)
 
 def create_app():
     config_logger()
-    
-    CORS(
-        app=app, 
-        resources={r"/api/*": {"origins": "*"}}, 
-        headers=['Content-Type', 'Authorization'],
-        methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        supports_credentials=True,
-    )
+
+    CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
     
     routes = Routes(app=app)
     routes.register_error_handlers()

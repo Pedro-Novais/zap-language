@@ -25,6 +25,11 @@ class UserRoute:
         self,
     ) -> None:
 
+        @self.user_bp.route("", methods=['GET'])
+        @token_required
+        def get_user_info(user_id: str) -> Response:
+            return self.user_controller.get_user_info(user_id=user_id)
+
         @self.user_bp.route("", methods=['POST'])
         def create_user() -> Response:
             return self.user_controller.create_user(request=request.json)

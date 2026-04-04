@@ -13,6 +13,14 @@ class UserRepository(ABC):
     ) -> Optional[UserModel]:
         
         raise NotImplementedError()
+    
+    @abstractmethod
+    def get_safe_user_by_id(
+        self, 
+        user_id: str,
+    ) -> Optional[UserModel]:
+        
+        raise NotImplementedError()
 
     @abstractmethod
     def get_user_by_email(

@@ -34,8 +34,18 @@ class UserRepositoryImpl(UserRepository):
     ) -> Optional[UserModel]:
         
         with get_db_session() as session:
-            return session.query(User).filter(User.id == user_id).first()
+            user = session.query(User).filter(User.id == user_id).first()
+            return self._transform_user_data_in_user_model(user=user)
         
+    def get_safe_user_by_id(
+        self, 
+        user_id: str,
+    ) -> Optional[UserModel]:
+        
+        with get_db_session() as session:
+            user = session.query(User).filter(User.id == user_id).first()
+            return self._transform_user_data_in_user_model(user=user)
+
     def get_user_by_email(
         self, 
         email: str,

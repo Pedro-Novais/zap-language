@@ -2,6 +2,7 @@ import os
 from typing import (
     Any, 
     Dict,
+    Tuple,
 )
 
 from flask import (
@@ -21,6 +22,7 @@ from core.interactor import (
     CreateUserInteractor,
     AuthenticateUserInteractor,
     AddPhoneNumberInteractor,
+    UserInteractor,
 )
 
 
@@ -43,6 +45,29 @@ class UserController:
             user_repository=user_repository,
             phone_verification_repository=phone_verification_repository,
         )
+        self.interactor = UserInteractor(user_repository=user_repository)
+
+    def get_user_info(
+        self,
+        user_id: str,
+    ) -> Tuple[Dict[str, Any], int]:
+        
+        user_model = self.interactor.get_user_info(user_id=user_id)
+        user_data = user_model.model_dump()
+
+        user_data.pop('id', None)
+        study_settings = user_data.get('study_settings')
+        if study_settings:
+            study_settings.pop('id', None)
+            study_settings.pop('user_id', None)
+
+            if study_settings.get('created_at'):
+                study_settings['created_at'] = study_settings['created_at'].isoformat()
+
+        if user_data.get('created_at'):
+            user_data['created_at'] = user_data['created_at'].isoformat()
+
+        return jsonify(user_data), 200
 
     def create_user(
         self, 
