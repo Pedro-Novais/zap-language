@@ -7,7 +7,7 @@ from typing import (
 )
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, Integer, Boolean, Text, ARRAY
+from sqlalchemy import String, Integer, Boolean, Text, ARRAY, DECIMAL
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -28,7 +28,7 @@ class Plan(Base):
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     slug: Mapped[str] = mapped_column(String(120), nullable=False, unique=True)
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
-    price: Mapped[int] = mapped_column(Integer, nullable=False)
+    price: Mapped[float] = mapped_column(DECIMAL, nullable=False)
     currency: Mapped[str] = mapped_column(String(3), nullable=False, default="BRL")
     billing_cycle: Mapped[str] = mapped_column(String(20), nullable=False, default="monthly")
     stripe_price_id: Mapped[str | None] = mapped_column(String(120), nullable=True)

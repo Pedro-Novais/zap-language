@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy.orm import joinedload
+from sqlalchemy import desc
 
 from external.database.models import Subscription
 from external.database.connection import get_db_session
@@ -20,6 +21,17 @@ class SubscriptionRepositoryImpl(SubscriptionRepository):
                     Subscription.user_id == user_id,
                     Subscription.is_active == True,
                 )
+                .first()
+            )
+            return self._to_subscription_model(subscription=subscription)
+
+    def get_last_by_user_id(self, user_id: str) -> Optional[SubscriptionModel]:
+        with get_db_session() as session:
+            subscription = (
+                session.query(Subscription)
+                .options(joinedload(Subscription.plan))
+                .filter(Subscription.user_id == user_id)
+                .order_by(desc(Subscription.started_at))
                 .first()
             )
             return self._to_subscription_model(subscription=subscription)

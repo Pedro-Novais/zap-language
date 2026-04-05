@@ -12,6 +12,10 @@ class SubscriptionRepository(ABC):
         raise NotImplementedError()
 
     @abstractmethod
+    def get_last_by_user_id(self, user_id: str) -> Optional[SubscriptionModel]:
+        raise NotImplementedError()
+
+    @abstractmethod
     def create(
         self,
         user_id: str,

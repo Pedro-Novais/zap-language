@@ -11,7 +11,7 @@ class PlanModel(BaseModel):
     name: str
     slug: str
     description: str
-    price: int
+    price: float
     currency: str
     billing_cycle: str
     stripe_price_id: str | None = None

@@ -15,6 +15,7 @@ from external.container import(
     whatsapp_service,
     password_hasher_service,
     phone_verification_repository,
+    subscription_repository,
 )
 from external.utils import validate_request
 
@@ -67,6 +68,23 @@ class UserController:
         if user_data.get('created_at'):
             user_data['created_at'] = user_data['created_at'].isoformat()
 
+        # Buscar última assinatura
+        subscription = subscription_repository.get_last_by_user_id(user_id=user_id)
+        subscription_data = {}
+        if subscription:
+            subscription_dict = subscription.model_dump(mode='json')
+            subscription_data = {
+                'id': str(subscription_dict.get('id')),
+                'planId': str(subscription_dict.get('plan_id')),
+                'status': subscription_dict.get('status'),
+                'startedAt': subscription_dict.get('started_at'),
+                'expiresAt': subscription_dict.get('expires_at'),
+                'isActive': subscription_dict.get('is_active'),
+                'gateway': subscription_dict.get('gateway'),
+                'plan': subscription_dict.get('plan'),
+            }
+
+        user_data['subscription'] = subscription_data
         return jsonify(user_data), 200
 
     def create_user(
