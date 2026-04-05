@@ -6,12 +6,15 @@ from external.repositories import (
     SystemConfigRepositoryImpl,
     ConversationSessionRepositoryImpl,
     ScenarioRepositoryImpl,
+    PlanRepositoryImpl,
+    SubscriptionRepositoryImpl,
 )
 from external.services import (
     ZApiService,
     AITutorService,
     RedisServiceImpl,
     BcryptPasswordHasherService,
+    GenericSubscriptionPaymentService,
 )
 from external.container.redis import redis_client
 
@@ -32,6 +35,8 @@ study_settings_repository = StudySettingsRepositoryImpl()
 system_config_repository = SystemConfigRepositoryImpl()
 conversation_session_repo = ConversationSessionRepositoryImpl()
 scenario_repository = ScenarioRepositoryImpl()
+plan_repository = PlanRepositoryImpl()
+subscription_repository = SubscriptionRepositoryImpl()
 
 system_config_model = SystemConfigModel(configs=system_config_repository.get_configurations())
 system_config = system_config_model.get_system_config()
@@ -39,6 +44,7 @@ system_config = system_config_model.get_system_config()
 whatsapp_service = ZApiService()
 ai_tutor_service = AITutorService()
 password_hasher_service = BcryptPasswordHasherService()
+subscription_payment_service = GenericSubscriptionPaymentService()
 redis_service = RedisServiceImpl(
     config=system_config.redis,
     redis_client=redis_client,

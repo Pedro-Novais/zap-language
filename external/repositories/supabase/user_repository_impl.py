@@ -117,6 +117,7 @@ class UserRepositoryImpl(UserRepository):
             name=user.name,
             phone=user.phone,
             whatsapp_enabled=user.whatsapp_enabled,
+            is_admin=user.is_admin,
             created_at=user.created_at,
             study_settings=study_settings_model,
             password=user.password,

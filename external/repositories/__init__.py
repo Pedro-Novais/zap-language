@@ -6,4 +6,6 @@ from .supabase import (
     SystemConfigRepositoryImpl,
     ConversationSessionRepositoryImpl,
     ScenarioRepositoryImpl,
+    PlanRepositoryImpl,
+    SubscriptionRepositoryImpl,
 )

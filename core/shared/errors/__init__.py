@@ -13,6 +13,8 @@ from .application_exceptions import (
     MaxAttemptsReachedError,
     CodeExpiredError,
     UnhandledConfigurationValueError,
+    SubscriptionNotFoundError,
+    ActiveSubscriptionAlreadyExistsError,
 )
 
 from .worker_exceptions import (

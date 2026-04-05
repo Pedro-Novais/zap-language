@@ -10,11 +10,14 @@ from core.interface.repository import (
     UserRepository, 
     PhoneVerificationRepository,
     MessageHistoryRepository,
+    PlanRepository,
+    SubscriptionRepository,
 )
 from core.interface.service import (
     WhatsappService,
     AITutorService,
     RedisService,
+    SubscriptionPaymentService,
 )
 from core.manager.services import (
     UserService, 
@@ -75,5 +78,29 @@ def user_repository_mock():
 def phone_verification_repository_mock():
     return create_autospec(
         spec=PhoneVerificationRepository, 
+        instance=True,
+    )
+
+
+@pytest.fixture
+def plan_repository_mock():
+    return create_autospec(
+        spec=PlanRepository,
+        instance=True,
+    )
+
+
+@pytest.fixture
+def subscription_repository_mock():
+    return create_autospec(
+        spec=SubscriptionRepository,
+        instance=True,
+    )
+
+
+@pytest.fixture
+def subscription_payment_service_mock():
+    return create_autospec(
+        spec=SubscriptionPaymentService,
         instance=True,
     )

@@ -9,5 +9,8 @@ from external.container.instances import (
     password_hasher_service,
     redis_service,
     system_config,
+    plan_repository,
+    subscription_repository,
+    subscription_payment_service,
 )
 from external.container.celery import app_celery

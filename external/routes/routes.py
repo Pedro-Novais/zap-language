@@ -4,6 +4,8 @@ from external.utils.error_handled_request import register_error_handlers
 from external.routes.user_routes import UserRoute
 from external.routes.zapi_routes import ZapiRoute
 from external.routes.study_settings_routes import StudySettingsRoute
+from external.routes.plan_routes import PlanRoute
+from external.routes.subscription_routes import SubscriptionRoute
 
 
 class Routes:
@@ -31,6 +33,14 @@ class Routes:
             app=app,
             base_route=base_route_v1,
         )
+        self.plan_route = PlanRoute(
+            app=app,
+            base_route=base_route_v1,
+        )
+        self.subscription_route = SubscriptionRoute(
+            app=app,
+            base_route=base_route_v1,
+        )
 
     def build_routes(
         self,
@@ -44,6 +54,8 @@ class Routes:
         self.user_route.register_routes()
         self.zapi_route.register_routes()
         self.study_settings_route.register_routes()
+        self.plan_route.register_routes()
+        self.subscription_route.register_routes()
 
     def register_error_handlers(
         self,

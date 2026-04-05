@@ -15,6 +15,7 @@ class UserModel(BaseModel):
     name: str
     phone: Optional[str] = None
     whatsapp_enabled: bool
+    is_admin: bool = False
     created_at: datetime
     study_settings: Optional[StudySettingsModel] = None
     password: str = Field(exclude=True)

@@ -1,13 +1,17 @@
+from __future__ import annotations
+
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
+    relationship,
 )
 from sqlalchemy import (
     String,
-    DateTime, 
+    DateTime,
+    Boolean,
     ForeignKey,
 )
 from sqlalchemy.dialects.postgresql import UUID
@@ -25,10 +29,23 @@ class Subscription(Base):
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("users.id"),
+        ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False
     )
-    status: Mapped[str] = mapped_column(String)
-    started_at: Mapped[datetime] = mapped_column(DateTime)
-    expires_at: Mapped[datetime | None] = mapped_column(DateTime)
+    plan_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("plans.id"),
+        nullable=False
+    )
+    status: Mapped[str] = mapped_column(String, nullable=False, default="active")
+    started_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+    )
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     gateway: Mapped[str | None] = mapped_column(String)
+
+    user: Mapped["User"] = relationship("User", back_populates="subscriptions")
+    plan: Mapped["Plan"] = relationship("Plan", back_populates="subscriptions")

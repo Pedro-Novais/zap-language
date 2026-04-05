@@ -172,3 +172,27 @@ class CodeExpiredError(ApplicationError):
             message_error="Código de verificação expirado",
             status_code=400,
         )
+
+
+class SubscriptionNotFoundError(ApplicationError):
+
+    def __init__(
+        self,
+    ) -> None:
+
+        super().__init__(
+            message_error="Assinatura ativa não encontrada",
+            status_code=404,
+        )
+
+
+class ActiveSubscriptionAlreadyExistsError(ApplicationError):
+
+    def __init__(
+        self,
+    ) -> None:
+
+        super().__init__(
+            message_error="Usuário já possui assinatura ativa",
+            status_code=409,
+        )

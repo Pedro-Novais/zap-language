@@ -5,3 +5,5 @@ from .message_history_repository_impl import MessageHistoryRepositoryImpl
 from .system_config_repository_impl import SystemConfigRepositoryImpl
 from .conversation_session_repository_impl import ConversationSessionRepositoryImpl
 from .scenario_repository_impl import ScenarioRepositoryImpl
+from .plan_repository_impl import PlanRepositoryImpl
+from .subscription_repository_impl import SubscriptionRepositoryImpl
