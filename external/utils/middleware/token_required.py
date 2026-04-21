@@ -13,6 +13,7 @@ from jwt.exceptions import (
 )
 from loguru import logger
 
+from core.shared.auth import get_auth_secret_key
 from external.container import (
     redis_service,
     user_repository,
@@ -32,7 +33,7 @@ def token_required(f):
         try:
             data = jwt.decode(
                 token, 
-                os.getenv("TOKEN_SECRET_KEY"), 
+                get_auth_secret_key(), 
                 algorithms=['HS256'],
             )
             user_id = data['userId']

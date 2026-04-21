@@ -1,15 +1,8 @@
-import os
-from datetime import (
-    datetime, 
-    timedelta, 
-    timezone,
-)
-
-import jwt
 from loguru import logger
 
 from core.interface.repository import UserRepository
 from core.interface.service import PasswordHasherService
+from core.shared.auth import generate_auth_token
 from core.shared.errors import (
     UserNotFoundError,
     IncorrectPasswordProvidedError,
@@ -49,22 +42,4 @@ class AuthenticateUserInteractor:
             raise IncorrectPasswordProvidedError()
         
         logger.info(f"User authenticated with email: {email}")
-        return self._generate_token(user_id=user.id)
-    
-    def _generate_token(
-        self,
-        user_id: str,
-    ) -> str:
-        
-        now = datetime.now(tz=timezone.utc)
-        payload = {
-            "userId": str(user_id),
-            "exp": int((now + timedelta(days=7)).timestamp()),
-            "iat": int(now.timestamp()),
-        }
-        token = jwt.encode(
-            payload=payload,
-            key=os.getenv("TOKEN_SECRET_KEY"),
-            algorithm="HS256",
-        )
-        return token
+        return generate_auth_token(user_id=str(user.id))

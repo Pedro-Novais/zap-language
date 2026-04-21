@@ -63,20 +63,20 @@ class StudySettingsInteractor:
         preferred_topics = None
         if study_settings_dto.persona_type is not None:
             persona_type = self._get_persona_type(persona_type=study_settings_dto.persona_type)
-            logger.info(f"Persona type selected: {persona_type}")
             
         if study_settings_dto.correction_level is not None:
             correction_level = self._get_correction_level(correction_level=study_settings_dto.correction_level)
-            logger.info(f"Correction level selected: {correction_level}")
             
         if study_settings_dto.language_dynamics is not None:
             language_dynamics = self._get_language_dynamics(language_dynamics=study_settings_dto.language_dynamics)
-            logger.info(f"Language dynamics selected: {language_dynamics}")
             
         if study_settings_dto.preferred_topics is not None:
             preferred_topics = self._get_preferred_topics(preferred_topics=study_settings_dto.preferred_topics)
-            logger.info(f"Preferred topics selected: {preferred_topics}")
-            
+        
+        if persona_type is None and correction_level is None and language_dynamics is None:
+            logger.warning("No fields to update")
+            return
+
         logger.info("Saving study settings")
         self.study_settings_repository.update(
             user_id=study_settings_dto.user_id,

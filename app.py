@@ -12,6 +12,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
+from external.container import google_oauth_service
 from external.routes import Routes
 from external.database.models import(
     StudySettings,
@@ -29,8 +30,17 @@ logger.remove()
 
 env_production = os.getenv("ENV") == "production"
 
+if not env_production:
+    os.environ.setdefault("AUTHLIB_INSECURE_TRANSPORT", "1")
+    os.environ.setdefault("OAUTHLIB_INSECURE_TRANSPORT", "1")
+
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY") or os.getenv("TOKEN_SECRET_KEY")
+app.config["SESSION_COOKIE_NAME"] = "zap_language_session"
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SECURE"] = env_production
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
 
 db = SQLAlchemy(app)
@@ -38,6 +48,7 @@ migrate = Migrate(app, db)
 
 def create_app():
     config_logger()
+    google_oauth_service.init_app(app)
 
     CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
     

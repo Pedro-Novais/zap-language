@@ -4,3 +4,4 @@ from .password_hasher_service import PasswordHasherService
 from .redis_service import RedisService
 from .id_protector_service import IDProtectorService
 from .subscription_payment_service import SubscriptionPaymentService
+from .send_email_service import SendEmailService

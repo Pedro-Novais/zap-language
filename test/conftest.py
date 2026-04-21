@@ -12,11 +12,13 @@ from core.interface.repository import (
     MessageHistoryRepository,
     PlanRepository,
     SubscriptionRepository,
+    ScenarioRepository,
 )
 from core.interface.service import (
     WhatsappService,
     AITutorService,
     RedisService,
+    PasswordHasherService,
     SubscriptionPaymentService,
 )
 from core.manager.services import (
@@ -102,5 +104,21 @@ def subscription_repository_mock():
 def subscription_payment_service_mock():
     return create_autospec(
         spec=SubscriptionPaymentService,
+        instance=True,
+    )
+
+
+@pytest.fixture
+def password_hasher_service_mock():
+    return create_autospec(
+        spec=PasswordHasherService,
+        instance=True,
+    )
+
+
+@pytest.fixture
+def scenario_repository_mock():
+    return create_autospec(
+        spec=ScenarioRepository,
         instance=True,
     )

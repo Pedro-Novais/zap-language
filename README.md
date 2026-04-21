@@ -43,6 +43,12 @@ O projeto atende à necessidade de praticar idiomas de maneira acessível e cons
 
 4.  **Configurar variáveis de ambiente**: Crie um arquivo `.env` na raiz do projeto e defina as chaves de API (WhatsApp/OpenAI) e strings de conexão do banco de dados.
 
+    Variáveis adicionais para autenticação Google:
+    - `GOOGLE_CLIENT_ID`
+    - `GOOGLE_CLIENT_SECRET`
+    - `SECRET_KEY`
+    - `FRONTEND_URL` (opcional, usado no redirect após o callback OAuth)
+
 5.  **Iniciar os serviços**:
     -   Certifique-se de que o **Redis** está rodando.
     -   Executar o Flask: `flask run` ou `python app.py`.
@@ -54,3 +60,4 @@ O projeto opera principalmente como um Webhook. A interação ocorre enviando me
 
 -   **Endpoint Principal**: `/webhook` (POST), que recebe os JSONs da API do WhatsApp contendo o texto do usuário.
 -   **Fluxo**: O servidor recebe a mensagem, valida o usuário via banco de dados, recupera o histórico, solicita a resposta à IA e devolve a mensagem formatada para o usuário final.
+-   **Login com Google**: `/api/v1/auth/login` inicia o redirecionamento OAuth2 e `/api/v1/auth/callback` conclui a autenticação, persistindo o usuário e criando a sessão autenticada.

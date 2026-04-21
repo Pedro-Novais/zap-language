@@ -7,9 +7,11 @@ from external.container.instances import (
     whatsapp_service,
     ai_tutor_service,
     password_hasher_service,
+    google_oauth_service,
     redis_service,
     system_config,
     plan_repository,
+    scenario_repository,
     subscription_repository,
     subscription_payment_service,
 )

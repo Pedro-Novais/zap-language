@@ -24,6 +24,7 @@ from core.interactor import (
     AuthenticateUserInteractor,
     AddPhoneNumberInteractor,
     UserInteractor,
+    ChangePasswordInteractor,
 )
 
 
@@ -46,6 +47,10 @@ class UserController:
             user_repository=user_repository,
             phone_verification_repository=phone_verification_repository,
         )
+        self.change_password_interactor = ChangePasswordInteractor(
+            user_repository=user_repository,
+            password_hasher_service=password_hasher_service,
+        )
         self.interactor = UserInteractor(user_repository=user_repository)
 
     def get_user_info(
@@ -59,7 +64,6 @@ class UserController:
         user_data.pop('id', None)
         study_settings = user_data.get('study_settings')
         if study_settings:
-            study_settings.pop('id', None)
             study_settings.pop('user_id', None)
 
             if study_settings.get('created_at'):
@@ -163,6 +167,24 @@ class UserController:
             max_age=60 * 60 * 24
         )
         return response
+    
+    def change_password(
+        self,
+        user_id: str,
+        request: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        
+        required_fields = ["oldPassword", "newPassword"]
+        validate_request(
+            request=request,
+            required_fields=required_fields,
+        )
+        self.change_password_interactor.execute(
+            user_id=user_id,
+            old_password=request["oldPassword"],
+            new_password=request["newPassword"],
+        )
+        return {}, 200
     
     def logout_user(
         self,

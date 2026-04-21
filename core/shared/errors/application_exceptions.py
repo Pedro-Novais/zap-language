@@ -118,6 +118,17 @@ class InvalidPhoneNumberError(ApplicationError):
             status_code=400,
         )
         
+class PhoneAlreadyRegisteredError(ApplicationError):
+
+    def __init__(
+        self,
+    ) -> None:
+            
+        super().__init__(
+            message_error="Número de telefone já está registrado",
+            status_code=400,
+        )
+        
 class InvalidVerificationCodeError(ApplicationError):
 
     def __init__(
@@ -195,4 +206,65 @@ class ActiveSubscriptionAlreadyExistsError(ApplicationError):
         super().__init__(
             message_error="Usuário já possui assinatura ativa",
             status_code=409,
+        )
+
+
+class ScenarioNotFoundError(ApplicationError):
+
+    def __init__(
+        self,
+    ) -> None:
+
+        super().__init__(
+            message_error="Cenário não encontrado",
+            status_code=404,
+        )
+
+
+class ScenarioKeyAlreadyExistsError(ApplicationError):
+
+    def __init__(
+        self,
+        key: str,
+    ) -> None:
+
+        super().__init__(
+            message_error=f"Já existe um cenário com a chave '{key}'",
+            status_code=409,
+        )
+
+
+class ScenarioPermissionDeniedError(ApplicationError):
+
+    def __init__(
+        self,
+    ) -> None:
+
+        super().__init__(
+            message_error="Usuário não possui permissão para alterar este cenário",
+            status_code=403,
+        )
+
+
+class OAuthConfigurationError(ApplicationError):
+
+    def __init__(
+        self,
+    ) -> None:
+
+        super().__init__(
+            message_error="Configuração do Google Login está incompleta",
+            status_code=500,
+        )
+
+
+class OAuthAuthenticationError(ApplicationError):
+
+    def __init__(
+        self,
+    ) -> None:
+
+        super().__init__(
+            message_error="Falha na autenticação com o Google",
+            status_code=401,
         )

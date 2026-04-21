@@ -15,6 +15,7 @@ from external.services import (
     RedisServiceImpl,
     BcryptPasswordHasherService,
     GenericSubscriptionPaymentService,
+    GoogleOAuthService,
 )
 from external.container.redis import redis_client
 
@@ -45,6 +46,7 @@ whatsapp_service = ZApiService()
 ai_tutor_service = AITutorService()
 password_hasher_service = BcryptPasswordHasherService()
 subscription_payment_service = GenericSubscriptionPaymentService()
+google_oauth_service = GoogleOAuthService()
 redis_service = RedisServiceImpl(
     config=system_config.redis,
     redis_client=redis_client,

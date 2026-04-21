@@ -54,6 +54,14 @@ class UserRoute:
         def authenticate_user() -> Response:
             return self.user_controller.authenticate_user(request=request.json)
 
+        @self.user_bp.route("/change-password", methods=['POST'])
+        @token_required
+        def change_password(user_id: str) -> Response:
+            return self.user_controller.change_password(
+                user_id=user_id,
+                request=request.json,
+            )
+
         @self.user_bp.route("/logout", methods=['POST'])
         def logout_user() -> Response:
             return self.user_controller.logout_user()

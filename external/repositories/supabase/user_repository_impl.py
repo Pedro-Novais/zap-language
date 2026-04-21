@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 from sqlalchemy.orm import joinedload
@@ -27,6 +28,28 @@ class UserRepositoryImpl(UserRepository):
             session.commit()
             session.refresh(user)
             return
+
+    def create_google_user(
+        self,
+        name: str,
+        email: str,
+        google_id: str,
+        password_hash: str,
+        last_login: datetime,
+    ) -> UserModel:
+
+        with get_db_session() as session:
+            user = User(
+                email=email,
+                name=name,
+                google_id=google_id,
+                password=password_hash,
+                last_login=last_login,
+            )
+            session.add(user)
+            session.commit()
+            session.refresh(user)
+            return self._transform_user_data_in_user_model(user=user)
         
     def get_user_by_id(
         self, 
@@ -84,8 +107,36 @@ class UserRepositoryImpl(UserRepository):
         with get_db_session() as session:
             user = session.query(User).filter(User.id == user_id).first()
             user.phone = phone_number
+            user.whatsapp_enabled = True
             session.commit()
             return
+    
+    def update_password(
+        self, 
+        user_id: str,
+        new_password_hash: str,
+    ) -> None:
+        
+        with get_db_session() as session:
+            user = session.query(User).filter(User.id == user_id).first()
+            user.password = new_password_hash
+            session.commit()
+            return
+
+    def update_google_login(
+        self,
+        user_id: str,
+        google_id: str,
+        last_login: datetime,
+    ) -> UserModel:
+
+        with get_db_session() as session:
+            user = session.query(User).filter(User.id == user_id).first()
+            user.google_id = google_id
+            user.last_login = last_login
+            session.commit()
+            session.refresh(user)
+            return self._transform_user_data_in_user_model(user=user)
     
     @staticmethod
     def _transform_user_data_in_user_model(
@@ -119,6 +170,8 @@ class UserRepositoryImpl(UserRepository):
             whatsapp_enabled=user.whatsapp_enabled,
             is_admin=user.is_admin,
             created_at=user.created_at,
+            google_id=user.google_id,
+            last_login=user.last_login,
             study_settings=study_settings_model,
             password=user.password,
         )

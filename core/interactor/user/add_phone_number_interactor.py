@@ -15,6 +15,7 @@ from core.shared.errors import (
     NoVerificationCodeWasGeneratedError,
     MaxAttemptsReachedError,
     CodeExpiredError,
+    PhoneAlreadyRegisteredError,
 )
 from core.model import PhoneVerificationModel
 
@@ -44,6 +45,7 @@ class AddPhoneNumberInteractor:
         logger.info(f"Adding phone number {phone_number} to user {user_id}")
         
         self._validate_format_of_phone_number(phone_number=phone_number)
+        self._check_if_phone_is_free(phone_number=phone_number)
         self._check_if_user_has_phone_number(user_id=user_id)
         
         self.phone_verification_repository.delete_old_verification_code(user_id=user_id)
@@ -74,6 +76,7 @@ class AddPhoneNumberInteractor:
         
         self._validate_format_of_phone_number(phone_number=phone_number)
         self._check_if_user_has_phone_number(user_id=user_id)
+        self._check_if_phone_is_free(phone_number=phone_number)
         
         saved_code_info = self.phone_verification_repository.get_verification_code_information(
             user_id=user_id,
@@ -100,6 +103,16 @@ class AddPhoneNumberInteractor:
         )
         return
     
+    def _check_if_phone_is_free(
+        self,
+        phone_number: str,
+    ) -> None:
+        
+        existing_user = self.user_repository.get_user_by_phone_number(phone=phone_number)
+        if existing_user is not None:
+            logger.error(f"Phone number {phone_number} is already associated with another user")
+            raise PhoneAlreadyRegisteredError()
+
     def _check_if_user_has_phone_number(
         self,
         user_id: str,

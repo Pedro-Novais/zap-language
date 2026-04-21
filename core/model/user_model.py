@@ -17,6 +17,8 @@ class UserModel(BaseModel):
     whatsapp_enabled: bool
     is_admin: bool = False
     created_at: datetime
+    google_id: Optional[str] = Field(default=None, exclude=True)
+    last_login: Optional[datetime] = Field(default=None, exclude=True)
     study_settings: Optional[StudySettingsModel] = None
     password: str = Field(exclude=True)
     current_topic: str | None = None
@@ -27,3 +29,12 @@ class UserModel(BaseModel):
         if v.tzinfo is None:
             return v.replace(tzinfo=timezone.utc)
         return v.astimezone(timezone.utc)
+
+    @field_validator("last_login", mode="after")
+    @classmethod
+    def ensure_last_login_utc(cls, value: Optional[datetime]) -> Optional[datetime]:
+        if value is None:
+            return None
+        if value.tzinfo is None:
+            return value.replace(tzinfo=timezone.utc)
+        return value.astimezone(timezone.utc)

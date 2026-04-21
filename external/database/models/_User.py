@@ -33,6 +33,7 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(120), nullable=False)
+    google_id: Mapped[str | None] = mapped_column(String(255), unique=True)
     phone: Mapped[str | None] = mapped_column(String(20), unique=True)
     whatsapp_enabled: Mapped[bool] = mapped_column(default=False)
     is_admin: Mapped[bool] = mapped_column(default=False, nullable=False)
@@ -40,6 +41,7 @@ class User(Base):
         DateTime,
         default=lambda: datetime.now(timezone.utc),
     )
+    last_login: Mapped[datetime | None] = mapped_column(DateTime)
     study_settings: Mapped["StudySettings"] = relationship(
         "StudySettings", 
         back_populates="user", 

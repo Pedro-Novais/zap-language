@@ -15,6 +15,20 @@ from .application_exceptions import (
     UnhandledConfigurationValueError,
     SubscriptionNotFoundError,
     ActiveSubscriptionAlreadyExistsError,
+    PhoneAlreadyRegisteredError,
+    ScenarioNotFoundError,
+    ScenarioKeyAlreadyExistsError,
+    ScenarioPermissionDeniedError,
+    OAuthConfigurationError,
+    OAuthAuthenticationError,
+)
+
+from .send_email_exceptions import (
+    SendEmailError,
+    SMTPConnectionError,
+    SMTPAuthenticationError,
+    InvalidEmailAddressError,
+    EmailSendingTimeoutError,
 )
 
 from .worker_exceptions import (

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
 from typing import Optional
 
 from core.model import UserModel
@@ -47,6 +48,18 @@ class UserRepository(ABC):
     ) -> None:
         
         raise NotImplementedError()
+
+    @abstractmethod
+    def create_google_user(
+        self,
+        name: str,
+        email: str,
+        google_id: str,
+        password_hash: str,
+        last_login: datetime,
+    ) -> UserModel:
+
+        raise NotImplementedError()
     
     @abstractmethod
     def get_phone_number_by_user_id(
@@ -63,4 +76,23 @@ class UserRepository(ABC):
         phone_number: str,
     ) -> None:
         
+        raise NotImplementedError()
+    
+    @abstractmethod
+    def update_password(
+        self, 
+        user_id: str,
+        new_password_hash: str,
+    ) -> None:
+        
+        raise NotImplementedError()
+
+    @abstractmethod
+    def update_google_login(
+        self,
+        user_id: str,
+        google_id: str,
+        last_login: datetime,
+    ) -> UserModel:
+
         raise NotImplementedError()
