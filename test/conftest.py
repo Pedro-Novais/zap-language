@@ -71,10 +71,14 @@ def whatsapp_service_mock():
 
 @pytest.fixture
 def user_repository_mock():
-    return create_autospec(
-        spec=UserRepository, 
+    mock = create_autospec(
+        spec=UserRepository,
         instance=True,
     )
+    mock.get_user_by_phone_number.return_value = None
+    mock.get_phone_number_by_user_id.return_value = None
+    return mock
+    
 
 @pytest.fixture
 def phone_verification_repository_mock():

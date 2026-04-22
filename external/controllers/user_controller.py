@@ -16,6 +16,7 @@ from external.container import(
     password_hasher_service,
     phone_verification_repository,
     subscription_repository,
+    send_email_service,
 )
 from external.utils import validate_request
 
@@ -25,6 +26,7 @@ from core.interactor import (
     AddPhoneNumberInteractor,
     UserInteractor,
     ChangePasswordInteractor,
+    ForgotPasswordInteractor,
 )
 
 
@@ -50,6 +52,11 @@ class UserController:
         self.change_password_interactor = ChangePasswordInteractor(
             user_repository=user_repository,
             password_hasher_service=password_hasher_service,
+        )
+        self.forgot_password_interactor = ForgotPasswordInteractor(
+            user_repository=user_repository,
+            send_email_service=send_email_service,
+            phone_verification_repository=phone_verification_repository,
         )
         self.interactor = UserInteractor(user_repository=user_repository)
 
@@ -185,7 +192,22 @@ class UserController:
             new_password=request["newPassword"],
         )
         return {}, 200
-    
+
+    def forgot_password(
+        self,
+        request: Dict[str, Any],
+    ) -> Dict[str, Any]:
+
+        required_fields = ["email"]
+        validate_request(
+            request=request,
+            required_fields=required_fields,
+        )
+        self.forgot_password_interactor.execute(
+            email=request["email"],
+        )
+        return {"message": "If the email exists, a reset link has been sent"}, 200
+
     def logout_user(
         self,
     ) -> Dict[str, Any]:

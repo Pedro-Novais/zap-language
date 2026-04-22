@@ -6,28 +6,7 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from external.database.base import Base
 
-
-class PhoneVerification(Base):
-    __tablename__ = 'phone_verifications'
-    
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4
-    )
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey('users.id'),
-        nullable=False
-    )
-    phone_number: Mapped[str] = mapped_column(String, nullable=False)
-    code: Mapped[str] = mapped_column(String, nullable=False)
-    attempts: Mapped[int] = mapped_column(Integer, default=0)
-    expires_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=lambda: datetime.now(timezone.utc) + timedelta(minutes=10)
-    )
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=lambda: datetime.now(timezone.utc)
-    )
+from ._CodeVerification import CodeVerification
+# TODO - Remove this file and update all imports to use CodeVerification instead of PhoneVerification, as the latter is just an alias for the former. This was done to avoid breaking changes while refactoring the codebase to use a more generic CodeVerification model that can be used for both phone and email verification.
+# Keep a compatibility alias for code that still imports PhoneVerification
+PhoneVerification = CodeVerification

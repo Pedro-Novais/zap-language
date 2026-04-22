@@ -1,6 +1,6 @@
 from typing import Optional
 
-from external.database.models import PhoneVerification
+from external.database.models import CodeVerification
 from external.database.connection import get_db_session
 from core.interface.repository import PhoneVerificationRepository
 from core.model import PhoneVerificationModel
@@ -11,15 +11,17 @@ class PhoneVerificationRepositoryImpl(PhoneVerificationRepository):
     def create_verification_code(
         self,
         user_id: str,
-        phone_number: str,
+        phone_number: Optional[str],
         code: str,
+        code_type: str = "PHONE",
     ) -> None:
         
         with get_db_session() as session:
-            phone_verification = PhoneVerification(
+            phone_verification = CodeVerification(
                 user_id=user_id,
-                phone_number=phone_number,
+                value=phone_number if phone_number is not None else None,
                 code=code,
+                code_type=code_type,
             )
             session.add(phone_verification)
             session.commit()
@@ -28,14 +30,19 @@ class PhoneVerificationRepositoryImpl(PhoneVerificationRepository):
     def get_verification_code_information(
         self,
         user_id: str,
-        phone_number: str,
+        phone_number: Optional[str],
+        code_type: str = "PHONE",
     ) -> Optional[PhoneVerificationModel]:
         
         with get_db_session() as session:
-            phone_verification = session.query(PhoneVerification).filter(
-                PhoneVerification.user_id == user_id,
-                PhoneVerification.phone_number == phone_number,
-            ).first()
+            query = session.query(CodeVerification).filter(
+                CodeVerification.user_id == user_id,
+                CodeVerification.code_type == code_type,
+            )
+            if phone_number is not None:
+                query = query.filter(CodeVerification.value == phone_number)
+
+            phone_verification = query.first()
             
             if phone_verification is None:
                 return None
@@ -43,11 +50,12 @@ class PhoneVerificationRepositoryImpl(PhoneVerificationRepository):
             return PhoneVerificationModel(
                 id=phone_verification.id,
                 user_id=phone_verification.user_id,
-                phone_number=phone_verification.phone_number,
+                value=phone_verification.value,
                 code=phone_verification.code,
                 attempts=phone_verification.attempts,
                 expires_at=phone_verification.expires_at,
                 created_at=phone_verification.created_at,
+                code_type=phone_verification.code_type,
             )
     
     def delete_old_verification_code(
@@ -56,8 +64,8 @@ class PhoneVerificationRepositoryImpl(PhoneVerificationRepository):
     ) -> None:
         
         with get_db_session() as session:
-            phone_verification = session.query(PhoneVerification).filter(
-                PhoneVerification.user_id == user_id,
+            phone_verification = session.query(CodeVerification).filter(
+                CodeVerification.user_id == user_id,
             ).all()
             if not phone_verification:
                 return
@@ -75,10 +83,10 @@ class PhoneVerificationRepositoryImpl(PhoneVerificationRepository):
     ) -> None:
         
         with get_db_session() as session:
-            session.query(PhoneVerification).filter(
-                PhoneVerification.id == code_id,
+            session.query(CodeVerification).filter(
+                CodeVerification.id == code_id,
             ).update({
-                PhoneVerification.attempts: attempts,
+                CodeVerification.attempts: attempts,
             })
             session.commit()
             return

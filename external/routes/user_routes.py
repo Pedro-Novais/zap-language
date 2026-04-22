@@ -65,5 +65,9 @@ class UserRoute:
         @self.user_bp.route("/logout", methods=['POST'])
         def logout_user() -> Response:
             return self.user_controller.logout_user()
-            
+
+        @self.user_bp.route("/forgot-password", methods=['POST'])
+        def forgot_password() -> Response:
+            return self.user_controller.forgot_password(request=request.json)
+
         self.app.register_blueprint(self.user_bp)

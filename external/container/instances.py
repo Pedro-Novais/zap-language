@@ -16,6 +16,7 @@ from external.services import (
     BcryptPasswordHasherService,
     GenericSubscriptionPaymentService,
     GoogleOAuthService,
+    ResendSendEmailService,
 )
 from external.container.redis import redis_client
 
@@ -47,6 +48,7 @@ ai_tutor_service = AITutorService()
 password_hasher_service = BcryptPasswordHasherService()
 subscription_payment_service = GenericSubscriptionPaymentService()
 google_oauth_service = GoogleOAuthService()
+send_email_service = ResendSendEmailService()
 redis_service = RedisServiceImpl(
     config=system_config.redis,
     redis_client=redis_client,

@@ -15,7 +15,7 @@ from external.database.models import (
     Subscription, 
     Plan, 
     MessageHistory, 
-    PhoneVerification,
+    CodeVerification,
     SystemConfig,
     ConversationSession,
     ScenarioContext,

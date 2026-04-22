@@ -10,8 +10,9 @@ class PhoneVerificationRepository(ABC):
     def create_verification_code(
         self,
         user_id: str,
-        phone_number: str,
+        phone_number: Optional[str],
         code: str,
+        code_type: str = "PHONE",
     ) -> None:
         
         raise NotImplementedError()
@@ -20,7 +21,8 @@ class PhoneVerificationRepository(ABC):
     def get_verification_code_information(
         self,
         user_id: str,
-        phone_number: str,
+        phone_number: Optional[str],
+        code_type: str = "PHONE",
     ) -> Optional[PhoneVerificationModel]:
         
         raise NotImplementedError()

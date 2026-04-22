@@ -8,6 +8,7 @@ from external.container.instances import (
     ai_tutor_service,
     password_hasher_service,
     google_oauth_service,
+    send_email_service,
     redis_service,
     system_config,
     plan_repository,

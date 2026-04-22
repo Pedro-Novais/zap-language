@@ -17,7 +17,7 @@ from external.routes import Routes
 from external.database.models import(
     StudySettings,
     User,
-    PhoneVerification,
+    CodeVerification,
     Subscription,
     Plan,
     MessageHistory,

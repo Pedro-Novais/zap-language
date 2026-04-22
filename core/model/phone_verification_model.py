@@ -1,5 +1,6 @@
 from uuid import UUID
 from datetime import datetime, timezone
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
@@ -9,11 +10,12 @@ class PhoneVerificationModel(BaseModel):
 
     id: UUID
     user_id: UUID
-    phone_number: str
+    value: Optional[str]
     code: str
     attempts: int
     expires_at: datetime
     created_at: datetime
+    code_type: str
     
     @field_validator("expires_at", "created_at", mode="after")
     @classmethod

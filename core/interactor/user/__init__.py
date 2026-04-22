@@ -4,3 +4,4 @@ from .add_phone_number_interactor import AddPhoneNumberInteractor
 from .user_interactor import UserInteractor
 from .change_password_interactor import ChangePasswordInteractor
 from .google_login_interactor import GoogleLoginInteractor
+from .forgot_password_interactor import ForgotPasswordInteractor

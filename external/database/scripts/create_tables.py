@@ -9,7 +9,7 @@ from external.database.models import StudySettings
 from external.database.models import Plan
 from external.database.models import Subscription
 from external.database.models import MessageHistory
-from external.database.models import PhoneVerification
+from external.database.models import CodeVerification
 from external.database.models import SystemConfig
 from external.database.models import ConversationSession
 from external.database.models import ScenarioContext
