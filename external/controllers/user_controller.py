@@ -27,6 +27,7 @@ from core.interactor import (
     UserInteractor,
     ChangePasswordInteractor,
     ForgotPasswordInteractor,
+    ResetPasswordInteractor,
 )
 
 
@@ -57,6 +58,11 @@ class UserController:
             user_repository=user_repository,
             send_email_service=send_email_service,
             phone_verification_repository=phone_verification_repository,
+        )
+        self.reset_password_interactor = ResetPasswordInteractor(
+            user_repository=user_repository,
+            phone_verification_repository=phone_verification_repository,
+            password_hasher_service=password_hasher_service,
         )
         self.interactor = UserInteractor(user_repository=user_repository)
 
@@ -206,7 +212,25 @@ class UserController:
         self.forgot_password_interactor.execute(
             email=request["email"],
         )
-        return {"message": "If the email exists, a reset link has been sent"}, 200
+        return {}, 200
+
+    def reset_password(
+        self,
+        request: Dict[str, Any],
+    ) -> Dict[str, Any]:
+
+        required_fields = ["password", "token"]
+        validate_request(
+            request=request,
+            required_fields=required_fields,
+        )
+
+        self.reset_password_interactor.execute(
+            token=request["token"],
+            new_password=request["password"],
+        )
+
+        return {}, 200
 
     def logout_user(
         self,

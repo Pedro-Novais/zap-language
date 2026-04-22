@@ -11,3 +11,4 @@ from .command_type import (
 )
 from .conversation_session_state import ConversationSessionsState
 from .conversation_session_type import ConversationSessionsType
+from .verification_code_type import VerificationCodeType

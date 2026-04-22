@@ -49,7 +49,7 @@ class TestAddPhoneNumberInteractor:
         
         phone_verification_repository_mock.create_verification_code.assert_called_once_with(
             user_id=user_id,
-            phone_number=phone_number,
+            value=phone_number,
             code=ANY,
         )
         

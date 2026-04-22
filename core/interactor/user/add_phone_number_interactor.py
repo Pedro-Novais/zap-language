@@ -53,7 +53,7 @@ class AddPhoneNumberInteractor:
         verification_code = self._generate_verification_code()
         self.phone_verification_repository.create_verification_code(
             user_id=user_id,
-            phone_number=phone_number,
+            value=phone_number,
             code=verification_code,
         )
         
@@ -80,7 +80,7 @@ class AddPhoneNumberInteractor:
         
         saved_code_info = self.phone_verification_repository.get_verification_code_information(
             user_id=user_id,
-            phone_number=phone_number,
+            value=phone_number,
         )
         if saved_code_info is None:
             logger.error("No verification code found for the provided phone number")

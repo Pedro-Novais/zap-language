@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 from core.model import PhoneVerificationModel
+from core.model.enum.verification_code_type import VerificationCodeType
 
 
 class PhoneVerificationRepository(ABC):
@@ -10,9 +11,9 @@ class PhoneVerificationRepository(ABC):
     def create_verification_code(
         self,
         user_id: str,
-        phone_number: Optional[str],
+        value: Optional[str],
         code: str,
-        code_type: str = "PHONE",
+        code_type: VerificationCodeType = VerificationCodeType.PHONE,
     ) -> None:
         
         raise NotImplementedError()
@@ -21,8 +22,8 @@ class PhoneVerificationRepository(ABC):
     def get_verification_code_information(
         self,
         user_id: str,
-        phone_number: Optional[str],
-        code_type: str = "PHONE",
+        value: Optional[str],
+        code_type: VerificationCodeType = VerificationCodeType.PHONE,
     ) -> Optional[PhoneVerificationModel]:
         
         raise NotImplementedError()
@@ -41,5 +42,14 @@ class PhoneVerificationRepository(ABC):
         code_id: str,
         attempts: int,
     ) -> None:
+        
+        raise NotImplementedError()
+
+    @abstractmethod
+    def get_verification_by_code(
+        self,
+        code: str,
+        code_type: VerificationCodeType = VerificationCodeType.PHONE,
+    ) -> Optional[PhoneVerificationModel]:
         
         raise NotImplementedError()

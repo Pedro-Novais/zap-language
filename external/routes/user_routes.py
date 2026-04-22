@@ -70,4 +70,8 @@ class UserRoute:
         def forgot_password() -> Response:
             return self.user_controller.forgot_password(request=request.json)
 
+        @self.user_bp.route("/reset-password", methods=['POST'])
+        def reset_password() -> Response:
+            return self.user_controller.reset_password(request=request.json)
+
         self.app.register_blueprint(self.user_bp)

@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator
+from core.model.enum.verification_code_type import VerificationCodeType
 
 
 class PhoneVerificationModel(BaseModel):
@@ -15,7 +16,7 @@ class PhoneVerificationModel(BaseModel):
     attempts: int
     expires_at: datetime
     created_at: datetime
-    code_type: str
+    code_type: VerificationCodeType
     
     @field_validator("expires_at", "created_at", mode="after")
     @classmethod

@@ -1,5 +1,6 @@
 import os
 
+from loguru import logger
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import DBAPIError
@@ -26,6 +27,7 @@ def get_db_session():
     try:
         yield session
     except DBAPIError as e:
+        logger.error(f"Database error: {e}")
         session.rollback()
         raise ExternalServiceError(error=e)
     finally:

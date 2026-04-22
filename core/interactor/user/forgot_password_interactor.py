@@ -4,6 +4,7 @@ from core.interface.repository import UserRepository, PhoneVerificationRepositor
 from core.interface.service import SendEmailService
 from core.shared.errors import UserNotFoundError
 from secrets import token_urlsafe
+from core.model.enum.verification_code_type import VerificationCodeType
 
 
 class ForgotPasswordInteractor:
@@ -29,23 +30,20 @@ class ForgotPasswordInteractor:
         if not user:
             logger.warning(f"User with email '{email}' not found")
             raise UserNotFoundError()
+
         reset_token = token_urlsafe(48)
-
-        # save token in verification table as EMAIL type
-        # phone_number left as None for email verifications
         self.phone_verification_repository.create_verification_code(
-            user_id=str(user.id),
-            phone_number=None,
+            user_id=user.id,
+            value=email,
             code=reset_token,
-            code_type="EMAIL",
+            code_type=VerificationCodeType.EMAIL,
         )
-
         reset_link = f"https://yourapp.com/reset-password?token={reset_token}"
-
-        self.send_email_service.send_email(
-            to=email,
-            subject="Reset Your Password",
-            body=f"Click here to reset your password: {reset_link}",
-        )
+        # TODO - Remove comment after create email template and configure email service
+        # self.send_email_service.send_email(
+        #     to=email,
+        #     subject="Reset Your Password",
+        #     body=f"Click here to reset your password: {reset_link}",
+        # )
 
         logger.info(f"Password reset email sent to {email}")
