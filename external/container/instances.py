@@ -14,7 +14,7 @@ from external.services import (
     AITutorService,
     RedisServiceImpl,
     BcryptPasswordHasherService,
-    GenericSubscriptionPaymentService,
+    AbacatePaySubscriptionPaymentService,
     GoogleOAuthService,
     ResendSendEmailService,
 )
@@ -46,7 +46,7 @@ system_config = system_config_model.get_system_config()
 whatsapp_service = ZApiService()
 ai_tutor_service = AITutorService()
 password_hasher_service = BcryptPasswordHasherService()
-subscription_payment_service = GenericSubscriptionPaymentService()
+subscription_payment_service = AbacatePaySubscriptionPaymentService()
 google_oauth_service = GoogleOAuthService()
 send_email_service = ResendSendEmailService()
 redis_service = RedisServiceImpl(

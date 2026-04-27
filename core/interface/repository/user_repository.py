@@ -96,3 +96,12 @@ class UserRepository(ABC):
     ) -> UserModel:
 
         raise NotImplementedError()
+
+    @abstractmethod
+    def update_is_valid(
+        self,
+        user_id: str,
+        is_valid: bool,
+    ) -> None:
+
+        raise NotImplementedError()

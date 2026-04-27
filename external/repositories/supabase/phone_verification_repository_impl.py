@@ -62,18 +62,19 @@ class PhoneVerificationRepositoryImpl(PhoneVerificationRepository):
     def delete_old_verification_code(
         self,
         user_id: str,
+        code_type: VerificationCodeType | None = None,
     ) -> None:
-        
         with get_db_session() as session:
-            phone_verification = session.query(CodeVerification).filter(
+            query = session.query(CodeVerification).filter(
                 CodeVerification.user_id == user_id,
-            ).all()
-            if not phone_verification:
+            )
+            if code_type is not None:
+                query = query.filter(CodeVerification.code_type == code_type)
+            phone_verifications = query.all()
+            if not phone_verifications:
                 return
-            
-            for instance in phone_verification:
+            for instance in phone_verifications:
                 session.delete(instance)
-                
             session.commit()
             return
         

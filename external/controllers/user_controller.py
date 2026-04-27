@@ -29,6 +29,10 @@ from core.interactor import (
     ForgotPasswordInteractor,
     ResetPasswordInteractor,
 )
+from core.interactor.user import (
+    RequestEmailVerificationInteractor,
+    VerifyEmailInteractor,
+)
 
 
 class UserController:
@@ -63,6 +67,15 @@ class UserController:
             user_repository=user_repository,
             phone_verification_repository=phone_verification_repository,
             password_hasher_service=password_hasher_service,
+        )
+        self.request_email_verification_interactor = RequestEmailVerificationInteractor(
+            user_repository=user_repository,
+            phone_verification_repository=phone_verification_repository,
+            send_email_service=send_email_service,
+        )
+        self.verify_email_interactor = VerifyEmailInteractor(
+            user_repository=user_repository,
+            phone_verification_repository=phone_verification_repository,
         )
         self.interactor = UserInteractor(user_repository=user_repository)
 
@@ -239,4 +252,33 @@ class UserController:
         response = make_response(jsonify({"message": "Logout realizado"}), 200)
         response.delete_cookie('authToken')
         return response
+
+    def request_email_verification(
+        self,
+        user_id: str,
+    ) -> Dict[str, Any]:
+        
+        self.request_email_verification_interactor.execute(
+            user_id=user_id,
+        )
+        
+        return {}, 200
+
+    def verify_email(
+        self,
+        user_id: str,
+        request: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        
+        required_fields = ["code"]
+        validate_request(
+            request=request,
+            required_fields=required_fields,
+        )
+        self.verify_email_interactor.execute(
+            user_id=user_id,
+            code=request["code"],
+        )
+        
+        return {}, 200
     

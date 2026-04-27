@@ -29,13 +29,18 @@ class ForgotPasswordInteractor:
         user = self.user_repository.get_user_by_email(email=email)
         if not user:
             logger.warning(f"User with email '{email}' not found")
-            raise UserNotFoundError()
+            return
 
         reset_token = token_urlsafe(48)
         self.phone_verification_repository.create_verification_code(
             user_id=user.id,
             value=email,
             code=reset_token,
+            code_type=VerificationCodeType.EMAIL,
+        )
+            # Remove apenas códigos antigos de reset de senha do tipo EMAIL para este usuário
+        self.phone_verification_repository.delete_old_verification_code(
+            user_id=user.id,
             code_type=VerificationCodeType.EMAIL,
         )
         reset_link = f"https://yourapp.com/reset-password?token={reset_token}"

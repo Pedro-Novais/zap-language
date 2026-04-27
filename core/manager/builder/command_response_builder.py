@@ -8,6 +8,7 @@ class CommandResponseBuilder:
     def response_for_error_command() -> str:
         return "Comando não reconhecido. Por favor, verifique e tente novamente \n Caso precise de ajuda, utilize o comando '/help'."
     
+    @staticmethod
     def response_for_end_session_command() -> str:
         return (
             "Sessão encerrada com sucesso!\n\n"

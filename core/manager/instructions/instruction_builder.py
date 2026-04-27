@@ -23,12 +23,9 @@ class InstructionBuilder:
         self, 
         user: UserModel,
         session: ConversationSessionModel,
-    ) -> Optional[str]: # Mudei para str para facilitar o envio à IA
+    ) -> Optional[str]:
 
         settings = user.study_settings
-        
-        # Pega o nível direto do usuário (resolvendo seu TODO)
-        # level_instr = user.language_level.get_user_level_language_instruction()
         
         current_topic = session.context_description or DEFAULT_TOPIC
         

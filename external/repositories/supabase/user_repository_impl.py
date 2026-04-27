@@ -45,6 +45,7 @@ class UserRepositoryImpl(UserRepository):
                 google_id=google_id,
                 password=password_hash,
                 last_login=last_login,
+                is_valid=True,
             )
             session.add(user)
             session.commit()
@@ -168,6 +169,7 @@ class UserRepositoryImpl(UserRepository):
             name=user.name,
             phone=user.phone,
             whatsapp_enabled=user.whatsapp_enabled,
+            is_valid=user.is_valid,
             is_admin=user.is_admin,
             created_at=user.created_at,
             google_id=user.google_id,
@@ -175,4 +177,19 @@ class UserRepositoryImpl(UserRepository):
             study_settings=study_settings_model,
             password=user.password,
         )
+
+    def update_is_valid(
+        self, 
+        user_id: str,
+        is_valid: bool,
+    ) -> None:
+        
+        with get_db_session() as session:
+            user = session.query(User).filter(User.id == user_id).first()
+            
+            if user:
+                user.is_valid = is_valid
+                session.commit()
+            
+            return
         

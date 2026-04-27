@@ -36,6 +36,7 @@ class User(Base):
     google_id: Mapped[str | None] = mapped_column(String(255), unique=True)
     phone: Mapped[str | None] = mapped_column(String(20), unique=True)
     whatsapp_enabled: Mapped[bool] = mapped_column(default=False)
+    is_valid: Mapped[bool] = mapped_column(default=False)
     is_admin: Mapped[bool] = mapped_column(default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime,

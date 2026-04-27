@@ -6,3 +6,5 @@ from .change_password_interactor import ChangePasswordInteractor
 from .google_login_interactor import GoogleLoginInteractor
 from .forgot_password_interactor import ForgotPasswordInteractor
 from .reset_password_interactor import ResetPasswordInteractor
+from .request_email_verification_interactor import RequestEmailVerificationInteractor
+from .verify_email_interactor import VerifyEmailInteractor

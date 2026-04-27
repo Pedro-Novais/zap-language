@@ -74,4 +74,19 @@ class UserRoute:
         def reset_password() -> Response:
             return self.user_controller.reset_password(request=request.json)
 
+        @self.user_bp.route("/verify-email", methods=['POST'])
+        @token_required
+        def verify_email(user_id: str) -> Response:
+            return self.user_controller.verify_email(
+                user_id=user_id,
+                request=request.json,
+            )
+
+        @self.user_bp.route("/request-email-verification", methods=['GET'])
+        @token_required
+        def request_email_verification(user_id: str) -> Response:
+            return self.user_controller.request_email_verification(
+                user_id=user_id,
+            )
+
         self.app.register_blueprint(self.user_bp)

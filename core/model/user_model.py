@@ -15,6 +15,7 @@ class UserModel(BaseModel):
     name: str
     phone: Optional[str] = None
     whatsapp_enabled: bool
+    is_valid: bool = False
     is_admin: bool = False
     created_at: datetime
     google_id: Optional[str] = Field(default=None, exclude=True)

@@ -32,8 +32,11 @@ class PhoneVerificationRepository(ABC):
     def delete_old_verification_code(
         self,
         user_id: str,
+        code_type: VerificationCodeType | None = None,
     ) -> None:
-        
+        """
+        Remove códigos antigos do usuário. Se code_type for informado, remove apenas daquele tipo.
+        """
         raise NotImplementedError()
     
     @abstractmethod
