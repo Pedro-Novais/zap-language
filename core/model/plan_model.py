@@ -19,3 +19,4 @@ class PlanModel(BaseModel):
     features: Any
     is_active: bool
     trial_days: int
+    is_free: bool = False

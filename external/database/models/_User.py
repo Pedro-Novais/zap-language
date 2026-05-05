@@ -8,7 +8,7 @@ from sqlalchemy.orm import (
     mapped_column, 
     relationship,
 )
-from sqlalchemy import String, DateTime, Boolean
+from sqlalchemy import String, DateTime, event, select
 from sqlalchemy.dialects.postgresql import UUID
 
 from external.database.base import Base
@@ -34,6 +34,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(120), nullable=False)
     google_id: Mapped[str | None] = mapped_column(String(255), unique=True)
+    sub: Mapped[str | None] = mapped_column(String(255), unique=True)
     phone: Mapped[str | None] = mapped_column(String(20), unique=True)
     whatsapp_enabled: Mapped[bool] = mapped_column(default=False)
     is_valid: Mapped[bool] = mapped_column(default=False)
@@ -43,6 +44,7 @@ class User(Base):
         default=lambda: datetime.now(timezone.utc),
     )
     last_login: Mapped[datetime | None] = mapped_column(DateTime)
+    payment_customer_id: Mapped[str | None] = mapped_column(String(255), unique=True)
     study_settings: Mapped["StudySettings"] = relationship(
         "StudySettings", 
         back_populates="user", 
@@ -64,3 +66,26 @@ class User(Base):
         cascade="all, delete-orphan",
     )
     created_scenarios: Mapped[List["ScenarioContext"]] = relationship("ScenarioContext", back_populates="creator")
+    
+def set_default_subscription(
+    mapper, 
+    connection, 
+    target,
+) -> None:
+
+    from ._Subscription import Subscription
+    from ._Plan import Plan
+    
+    plan_query = select(Plan.id).where(Plan.is_free == True).limit(1)
+    plan_id = connection.execute(plan_query).scalar()
+    if plan_id:
+        connection.execute(
+            Subscription.__table__.insert().values(
+                id=uuid.uuid4(),
+                user_id=target.id,
+                plan_id=plan_id,
+                expires_at=None,
+            )
+        )
+
+event.listen(User, "after_insert", set_default_subscription)

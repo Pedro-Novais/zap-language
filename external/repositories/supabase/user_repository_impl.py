@@ -16,7 +16,7 @@ class UserRepositoryImpl(UserRepository):
         name: str,
         email: str,
         password_hash: str,
-    ) -> None:
+    ) -> UserModel:
 
         with get_db_session() as session:
             user = User(
@@ -27,13 +27,13 @@ class UserRepositoryImpl(UserRepository):
             session.add(user)
             session.commit()
             session.refresh(user)
-            return
+            return self._transform_user_data_in_user_model(user=user)
 
     def create_google_user(
         self,
         name: str,
         email: str,
-        google_id: str,
+        sub: str,
         password_hash: str,
         last_login: datetime,
     ) -> UserModel:
@@ -42,7 +42,7 @@ class UserRepositoryImpl(UserRepository):
             user = User(
                 email=email,
                 name=name,
-                google_id=google_id,
+                sub=sub,
                 password=password_hash,
                 last_login=last_login,
                 is_valid=True,
@@ -90,6 +90,15 @@ class UserRepositoryImpl(UserRepository):
             ).filter(User.phone == phone).first()
             return self._transform_user_data_in_user_model(user=user)
     
+    def get_user_by_sub(
+        self,
+        sub: str,
+    ) -> Optional[UserModel]:
+
+        with get_db_session() as session:
+            user = session.query(User).filter(User.sub == sub).first()
+            return self._transform_user_data_in_user_model(user=user)
+    
     def get_phone_number_by_user_id(
         self, 
         user_id: str,
@@ -127,17 +136,30 @@ class UserRepositoryImpl(UserRepository):
     def update_google_login(
         self,
         user_id: str,
-        google_id: str,
+        sub: str,
         last_login: datetime,
     ) -> UserModel:
 
         with get_db_session() as session:
             user = session.query(User).filter(User.id == user_id).first()
-            user.google_id = google_id
+            user.sub = sub
             user.last_login = last_login
             session.commit()
             session.refresh(user)
             return self._transform_user_data_in_user_model(user=user)
+
+    def update_payment_customer_id(
+        self,
+        user_id: str,
+        payment_customer_id: str,
+    ) -> None:
+
+        with get_db_session() as session:
+            user = session.query(User).filter(User.id == user_id).first()
+            if user:
+                user.payment_customer_id = payment_customer_id
+                session.commit()
+            return
     
     @staticmethod
     def _transform_user_data_in_user_model(
@@ -173,7 +195,9 @@ class UserRepositoryImpl(UserRepository):
             is_admin=user.is_admin,
             created_at=user.created_at,
             google_id=user.google_id,
+            sub=user.sub,
             last_login=user.last_login,
+            payment_customer_id=user.payment_customer_id,
             study_settings=study_settings_model,
             password=user.password,
         )

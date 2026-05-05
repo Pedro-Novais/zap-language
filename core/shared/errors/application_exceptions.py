@@ -262,9 +262,10 @@ class OAuthAuthenticationError(ApplicationError):
 
     def __init__(
         self,
+        message_error: str | None = None,
     ) -> None:
 
         super().__init__(
-            message_error="Falha na autenticação com o Google",
+            message_error=message_error or "Falha na autenticação com o Google",
             status_code=401,
         )

@@ -19,9 +19,11 @@ class UserModel(BaseModel):
     is_admin: bool = False
     created_at: datetime
     google_id: Optional[str] = Field(default=None, exclude=True)
+    sub: Optional[str] = Field(default=None, exclude=True)
     last_login: Optional[datetime] = Field(default=None, exclude=True)
     study_settings: Optional[StudySettingsModel] = None
     password: str = Field(exclude=True)
+    payment_customer_id: Optional[str] = Field(default=None, exclude=True)
     current_topic: str | None = None
     
     @field_validator("created_at", mode="after")

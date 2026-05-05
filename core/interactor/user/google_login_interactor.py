@@ -23,20 +23,20 @@ class GoogleLoginInteractor:
         self,
         email: str,
         name: str,
-        google_id: str,
+        sub: str,
     ) -> str:
 
         logger.info(f"Processing Google login for email: {email}")
 
         last_login = datetime.now(timezone.utc)
-        user = self.user_repository.get_user_by_email(email=email)
+        user = self.user_repository.get_user_by_sub(sub=sub)
         if not user:
             generated_password = secrets.token_urlsafe(32)
             password_hash = self.password_hasher_service.hash(password=generated_password)
             user = self.user_repository.create_google_user(
                 name=name,
                 email=email,
-                google_id=google_id,
+                sub=sub,
                 password_hash=password_hash,
                 last_login=last_login,
             )
@@ -44,7 +44,7 @@ class GoogleLoginInteractor:
         else:
             user = self.user_repository.update_google_login(
                 user_id=str(user.id),
-                google_id=google_id,
+                sub=sub,
                 last_login=last_login,
             )
             logger.info(f"Updated last login for Google user: {email}")

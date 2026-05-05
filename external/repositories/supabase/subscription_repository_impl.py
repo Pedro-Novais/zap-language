@@ -119,6 +119,7 @@ class SubscriptionRepositoryImpl(SubscriptionRepository):
                 features=subscription.plan.features,
                 is_active=subscription.plan.is_active,
                 trial_days=subscription.plan.trial_days,
+                is_free=subscription.plan.is_free,
             )
 
         return SubscriptionModel(

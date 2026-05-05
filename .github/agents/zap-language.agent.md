@@ -62,4 +62,4 @@ Tasks/Cache: Redis & Celery.
 
 Email: Resend.
 
-Dev Env: Pop!_OS / Linux.
+Dev Env: Windows.

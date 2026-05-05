@@ -35,6 +35,7 @@ class PlanController:
             is_active=request.get("isActive", True),
             trial_days=request.get("trialDays", 0),
             stripe_price_id=request.get("stripePriceId"),
+            is_free=request.get("isFree", False),
         )
         plan = self.plan_interactor.create_plan(dto=dto)
         return jsonify(plan.model_dump()), 201

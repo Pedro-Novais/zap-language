@@ -6,7 +6,7 @@ from faker import Faker
 from core.interactor.subscription.subscription_interactor import SubscriptionInteractor
 from core.interactor.subscription.dto import SubscriptionRequestDTO
 from core.interface.repository import SubscriptionRepository
-from core.interface.service import SubscriptionPaymentService
+from core.interface.service import PaymentService
 from core.model import SubscriptionModel
 from core.shared.errors import (
     ActiveSubscriptionAlreadyExistsError,
@@ -22,7 +22,7 @@ class TestSubscriptionInteractor:
     def interactor(
         self,
         subscription_repository_mock: SubscriptionRepository,
-        subscription_payment_service_mock: SubscriptionPaymentService,
+        subscription_payment_service_mock: PaymentService,
     ):
         return SubscriptionInteractor(
             subscription_repository=subscription_repository_mock,
@@ -72,7 +72,7 @@ class TestSubscriptionInteractor:
         self,
         interactor: SubscriptionInteractor,
         subscription_repository_mock: SubscriptionRepository,
-        subscription_payment_service_mock: SubscriptionPaymentService,
+        subscription_payment_service_mock: PaymentService,
     ) -> None:
         user_id = fake.uuid4()
         plan_id = fake.uuid4()
@@ -132,7 +132,7 @@ class TestSubscriptionInteractor:
         self,
         interactor: SubscriptionInteractor,
         subscription_repository_mock: SubscriptionRepository,
-        subscription_payment_service_mock: SubscriptionPaymentService,
+        subscription_payment_service_mock: PaymentService,
     ) -> None:
         user_id = fake.uuid4()
         plan_id = fake.uuid4()

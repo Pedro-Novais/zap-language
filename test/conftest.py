@@ -1,6 +1,7 @@
 import sys
 import os
 
+os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import pytest
@@ -19,7 +20,7 @@ from core.interface.service import (
     AITutorService,
     RedisService,
     PasswordHasherService,
-    SubscriptionPaymentService,
+    PaymentService,
 )
 from core.manager.services import (
     UserService, 
@@ -77,6 +78,7 @@ def user_repository_mock():
     )
     mock.get_user_by_phone_number.return_value = None
     mock.get_phone_number_by_user_id.return_value = None
+    mock.get_user_by_sub.return_value = None
     return mock
     
 
@@ -107,7 +109,7 @@ def subscription_repository_mock():
 @pytest.fixture
 def subscription_payment_service_mock():
     return create_autospec(
-        spec=SubscriptionPaymentService,
+        spec=PaymentService,
         instance=True,
     )
 

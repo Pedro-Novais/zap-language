@@ -35,7 +35,7 @@ class TestGoogleLoginInteractor:
 
         monkeypatch.setenv("SECRET_KEY", "test-secret")
 
-        google_id = "google-sub-123"
+        sub = "google-sub-123"
         email = "google-user@example.com"
         name = "Google User"
         expected_user = UserModel(
@@ -45,24 +45,24 @@ class TestGoogleLoginInteractor:
             phone=None,
             whatsapp_enabled=False,
             created_at=datetime.now(),
-            google_id=google_id,
+            sub=sub,
             last_login=datetime.now(),
             study_settings=None,
             password="hashed-random-password",
             current_topic=None,
         )
 
-        user_repository_mock.get_user_by_email.return_value = None
+        user_repository_mock.get_user_by_sub.return_value = None
         password_hasher_service_mock.hash.return_value = "hashed-random-password"
         user_repository_mock.create_google_user.return_value = expected_user
 
         token = interactor.execute(
             email=email,
             name=name,
-            google_id=google_id,
+            sub=sub,
         )
 
-        user_repository_mock.get_user_by_email.assert_called_once_with(email=email)
+        user_repository_mock.get_user_by_sub.assert_called_once_with(sub=sub)
         password_hasher_service_mock.hash.assert_called_once()
         user_repository_mock.create_google_user.assert_called_once()
         decoded_token = jwt.decode(token, "test-secret", algorithms=["HS256"])
@@ -85,7 +85,7 @@ class TestGoogleLoginInteractor:
             phone=None,
             whatsapp_enabled=False,
             created_at=datetime.now(),
-            google_id=None,
+            sub="old-sub",
             last_login=None,
             study_settings=None,
             password="hashed-password",
@@ -98,23 +98,23 @@ class TestGoogleLoginInteractor:
             phone=existing_user.phone,
             whatsapp_enabled=existing_user.whatsapp_enabled,
             created_at=existing_user.created_at,
-            google_id="google-sub-456",
+            sub="google-sub-456",
             last_login=datetime.now(),
             study_settings=None,
             password=existing_user.password,
             current_topic=None,
         )
 
-        user_repository_mock.get_user_by_email.return_value = existing_user
+        user_repository_mock.get_user_by_sub.return_value = existing_user
         user_repository_mock.update_google_login.return_value = updated_user
 
         token = interactor.execute(
             email=existing_user.email,
             name=existing_user.name,
-            google_id="google-sub-456",
+            sub="google-sub-456",
         )
 
-        user_repository_mock.get_user_by_email.assert_called_once_with(email=existing_user.email)
+        user_repository_mock.get_user_by_sub.assert_called_once_with(sub="google-sub-456")
         password_hasher_service_mock.hash.assert_not_called()
         user_repository_mock.create_google_user.assert_not_called()
         user_repository_mock.update_google_login.assert_called_once()

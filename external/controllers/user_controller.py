@@ -16,6 +16,7 @@ from external.container import(
     password_hasher_service,
     phone_verification_repository,
     subscription_repository,
+    subscription_payment_service,
     send_email_service,
 )
 from external.utils import validate_request
@@ -44,6 +45,7 @@ class UserController:
         self.create_user_interactor = CreateUserInteractor(
             user_repository=user_repository,
             password_hasher_service=password_hasher_service,
+            payment_service=subscription_payment_service,
         )
         self.authenticate_user_interactor = AuthenticateUserInteractor(
             user_repository=user_repository,

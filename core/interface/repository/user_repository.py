@@ -40,11 +40,28 @@ class UserRepository(ABC):
         raise NotImplementedError()
 
     @abstractmethod
+    def get_user_by_sub(
+        self,
+        sub: str,
+    ) -> Optional[UserModel]:
+
+        raise NotImplementedError()
+
+    @abstractmethod
     def create(
         self, 
         email: str,
         name: str,
         password_hash: str,
+    ) -> UserModel:
+        
+        raise NotImplementedError()
+
+    @abstractmethod
+    def update_payment_customer_id(
+        self,
+        user_id: str,
+        payment_customer_id: str,
     ) -> None:
         
         raise NotImplementedError()
@@ -54,7 +71,7 @@ class UserRepository(ABC):
         self,
         name: str,
         email: str,
-        google_id: str,
+        sub: str,
         password_hash: str,
         last_login: datetime,
     ) -> UserModel:
@@ -91,7 +108,7 @@ class UserRepository(ABC):
     def update_google_login(
         self,
         user_id: str,
-        google_id: str,
+        sub: str,
         last_login: datetime,
     ) -> UserModel:
 

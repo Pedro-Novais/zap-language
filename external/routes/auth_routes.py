@@ -27,4 +27,8 @@ class AuthRoute:
         def google_auth_callback() -> Response:
             return self.auth_controller.google_auth_callback()
 
+        @self.auth_bp.route('/google-login', methods=['POST'])
+        def google_login() -> Response:
+            return self.auth_controller.google_login()
+
         self.app.register_blueprint(self.auth_bp)

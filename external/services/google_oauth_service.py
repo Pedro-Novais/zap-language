@@ -3,6 +3,8 @@ from typing import Any, Dict
 
 from authlib.integrations.flask_client import OAuth
 from flask import Flask, url_for
+import jwt
+import requests
 
 from core.shared.errors import (
     OAuthAuthenticationError,
@@ -63,6 +65,52 @@ class GoogleOAuthService:
             raise OAuthAuthenticationError()
 
         return dict(user_info)
+
+    def validate_id_token(
+        self,
+        id_token: str,
+    ) -> Dict[str, Any]:
+        """
+        Validate Google ID token and return the decoded payload.
+        """
+        try:
+            # Get Google's public keys
+            response = requests.get("https://www.googleapis.com/oauth2/v3/certs")
+            response.raise_for_status()
+            keys = response.json()["keys"]
+
+            # Decode without verification first to get header
+            header = jwt.get_unverified_header(id_token)
+            kid = header.get("kid")
+
+            # Find the correct key
+            key = None
+            for k in keys:
+                if k["kid"] == kid:
+                    key = k
+                    break
+
+            if not key:
+                raise OAuthAuthenticationError("Invalid token: key not found")
+
+            payload = jwt.decode(
+                id_token,
+                key,
+                algorithms=["RS256"],
+                audience=os.getenv("GOOGLE_CLIENT_ID"),
+                issuer="https://accounts.google.com"
+            )
+
+            return payload
+
+        except jwt.ExpiredSignatureError:
+            raise OAuthAuthenticationError("Token has expired")
+        except jwt.InvalidTokenError as e:
+            raise OAuthAuthenticationError(f"Invalid token: {str(e)}")
+        except OAuthAuthenticationError:
+            raise
+        except Exception as exc:
+            raise OAuthAuthenticationError() from exc
 
     def _get_client(self):
         client = self.oauth.create_client(self.CLIENT_NAME)

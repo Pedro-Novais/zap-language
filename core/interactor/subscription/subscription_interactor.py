@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from loguru import logger
 
 from core.interface.repository import SubscriptionRepository
-from core.interface.service import SubscriptionPaymentService
+from core.interface.service import PaymentService
 from core.shared.errors import (
     ActiveSubscriptionAlreadyExistsError,
     SubscriptionNotFoundError,
@@ -16,7 +16,7 @@ class SubscriptionInteractor:
     def __init__(
         self,
         subscription_repository: SubscriptionRepository,
-        subscription_payment_service: SubscriptionPaymentService,
+        subscription_payment_service: PaymentService,
     ) -> None:
         self.subscription_repository = subscription_repository
         self.subscription_payment_service = subscription_payment_service
