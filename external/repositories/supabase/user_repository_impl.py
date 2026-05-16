@@ -42,7 +42,7 @@ class UserRepositoryImpl(UserRepository):
             user = User(
                 email=email,
                 name=name,
-                sub=sub,
+                google_id=sub,
                 password=password_hash,
                 last_login=last_login,
                 is_valid=True,
@@ -96,7 +96,7 @@ class UserRepositoryImpl(UserRepository):
     ) -> Optional[UserModel]:
 
         with get_db_session() as session:
-            user = session.query(User).filter(User.sub == sub).first()
+            user = session.query(User).filter(User.google_id == sub).first()
             return self._transform_user_data_in_user_model(user=user)
     
     def get_phone_number_by_user_id(
@@ -142,7 +142,7 @@ class UserRepositoryImpl(UserRepository):
 
         with get_db_session() as session:
             user = session.query(User).filter(User.id == user_id).first()
-            user.sub = sub
+            user.google_id = sub
             user.last_login = last_login
             session.commit()
             session.refresh(user)
@@ -195,7 +195,6 @@ class UserRepositoryImpl(UserRepository):
             is_admin=user.is_admin,
             created_at=user.created_at,
             google_id=user.google_id,
-            sub=user.sub,
             last_login=user.last_login,
             payment_customer_id=user.payment_customer_id,
             study_settings=study_settings_model,

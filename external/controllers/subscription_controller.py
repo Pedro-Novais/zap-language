@@ -2,7 +2,12 @@ from typing import Any, Dict, Tuple
 
 from flask import jsonify
 
-from external.container import subscription_repository, subscription_payment_service
+from external.container import (
+    subscription_repository,
+    subscription_payment_service,
+    plan_repository,
+    user_repository,
+)
 from external.utils import validate_request
 from core.interactor import SubscriptionInteractor
 from core.interactor.subscription.dto import SubscriptionRequestDTO
@@ -12,8 +17,10 @@ class SubscriptionController:
 
     def __init__(self) -> None:
         self.subscription_interactor = SubscriptionInteractor(
+            plan_repository=plan_repository,
             subscription_repository=subscription_repository,
             subscription_payment_service=subscription_payment_service,
+            user_repository=user_repository,
         )
 
     def get_user_subscription(self, user_id: str) -> Tuple[Dict[str, Any], int]:

@@ -4,9 +4,10 @@ from unittest.mock import Mock, patch
 import pytest
 import requests
 import jwt
+from flask import Flask
 
 from external.services.google_oauth_service import GoogleOAuthService
-from core.shared.errors import OAuthAuthenticationError
+from core.shared.errors import OAuthAuthenticationError, OAuthConfigurationError
 
 
 class TestGoogleOAuthService:
@@ -100,3 +101,23 @@ class TestGoogleOAuthService:
 
             with pytest.raises(OAuthAuthenticationError, match="Invalid token: key not found"):
                 service.validate_id_token("token.with.unknown.kid")
+
+    def test_get_client_raises_oauth_configuration_error_when_not_configured(self, service: GoogleOAuthService):
+        with patch.dict('os.environ', {}, clear=True):
+            with pytest.raises(OAuthConfigurationError):
+                service._get_client()
+
+    def test_init_app_registers_google_client_when_configured(self, service: GoogleOAuthService):
+        app = Flask(__name__)
+
+        with patch.dict(
+            'os.environ',
+            {
+                'GOOGLE_CLIENT_ID': 'test-client-id',
+                'GOOGLE_CLIENT_SECRET': 'test-client-secret',
+            },
+            clear=True,
+        ):
+            with patch.object(service.oauth, 'register') as mock_register:
+                service.init_app(app)
+                mock_register.assert_called_once()

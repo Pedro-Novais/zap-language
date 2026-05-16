@@ -40,12 +40,12 @@ class CreateUserInteractor:
 
         try:
             payment_customer_id = self.payment_service.create_customer(
-                user_id=user.id,
+                user_id=str(user.id),
                 name=name,
                 email=email,
             )
             self.user_repository.update_payment_customer_id(
-                user_id=user.id,
+                user_id=str(user.id),
                 payment_customer_id=payment_customer_id,
             )
         except Exception as error:

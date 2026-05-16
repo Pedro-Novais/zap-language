@@ -1,5 +1,6 @@
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
+from typing import Any, Optional
 
 import requests
 
@@ -18,20 +19,69 @@ class AbacatePayPaymentService(PaymentService):
             "Content-Type": "application/json"
         }
 
+    @staticmethod
+    def _parse_subscription_response_payload(
+        data: dict[str, Any],
+    ) -> tuple[str, Optional[datetime]]:
+        payload = data.get("data") if isinstance(data.get("data"), dict) else data
+        status = str(
+            payload.get("status")
+            or payload.get("subscriptionStatus")
+            or payload.get("state")
+            or "pending",
+        )
+        expires_raw = (
+            payload.get("expiresAt")
+            or payload.get("expires_at")
+            or payload.get("currentPeriodEnd")
+        )
+        expires_at: Optional[datetime] = None
+        if expires_raw:
+            try:
+                if isinstance(expires_raw, (int, float)):
+                    expires_at = datetime.fromtimestamp(
+                        expires_raw / 1000 if expires_raw > 1e12 else expires_raw,
+                        tz=timezone.utc,
+                    )
+                elif isinstance(expires_raw, str):
+                    normalized = expires_raw.replace("Z", "+00:00")
+                    expires_at = datetime.fromisoformat(normalized)
+                    if expires_at.tzinfo is None:
+                        expires_at = expires_at.replace(tzinfo=timezone.utc)
+                    else:
+                        expires_at = expires_at.astimezone(timezone.utc)
+            except (ValueError, OSError):
+                expires_at = None
+        return status, expires_at
+
     def create_subscription(
         self,
-        user: str,
+        customer_id: str,
         plan_id: str,
-    ) -> tuple[str, str, datetime]:
+    ) -> tuple[str, Optional[str], Optional[datetime]]:
 
         url = f"{self.URL_BASE}/subscriptions/create"
         payload = {
-            "customerId": user,
-            "items": plan_id,
-            "frequency": "monthly"
+            "customerId": customer_id,
+            "items": [
+                {
+                    "id": plan_id,
+                    "quantity": 1,
+                }
+            ],
+            "methods": [
+                "CARD",
+            ],
         }
-        response = requests.post(url, json=payload, headers=self.headers)
-        return response.json()
+        response = requests.post(url, json=payload, headers=self.headers, timeout=60)
+        response.raise_for_status()
+        data = response.json() if response.content else {}
+        if not isinstance(data, dict):
+            data = {}
+
+        gateway = "abacatepay"
+        status, expires_at = self._parse_subscription_response_payload(data=data)
+        return status, gateway, expires_at
 
     def create_customer(
         self,
@@ -49,7 +99,7 @@ class AbacatePayPaymentService(PaymentService):
         response = requests.post(url, json=payload, headers=self.headers)
         response.raise_for_status()
         response_data = response.json()
-        customer_id = response_data.get("customerId")
+        customer_id = response_data.get("data", {}).get("id")
         if not customer_id:
             raise ValueError("Missing customerId in payment gateway response")
         
@@ -62,5 +112,5 @@ class AbacatePayPaymentService(PaymentService):
     ) -> None:
 
         url = f"{self.URL_BASE}/subscriptions/{subscription_id}/cancel"
-        response = requests.post(url, headers=self.headers)
-        return response.status_code == 200
+        response = requests.post(url, headers=self.headers, timeout=30)
+        response.raise_for_status()

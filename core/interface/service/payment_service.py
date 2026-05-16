@@ -8,7 +8,7 @@ class PaymentService(ABC):
     @abstractmethod
     def create_subscription(
         self,
-        user_id: str,
+        customer_id: str,
         plan_id: str,
     ) -> tuple[str, Optional[str], Optional[datetime]]:
         raise NotImplementedError()

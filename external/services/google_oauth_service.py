@@ -28,8 +28,12 @@ class GoogleOAuthService:
     ) -> None:
 
         self.oauth.init_app(app)
-        if not self._is_configured():
-            return
+        if self._is_configured():
+            self._register_client()
+
+    def _register_client(
+        self,
+    ) -> None:
 
         self.oauth.register(
             name=self.CLIENT_NAME,
@@ -113,9 +117,17 @@ class GoogleOAuthService:
             raise OAuthAuthenticationError() from exc
 
     def _get_client(self):
+        if not self._is_configured():
+            raise OAuthConfigurationError()
+
         client = self.oauth.create_client(self.CLIENT_NAME)
         if client is None:
+            self._register_client()
+            client = self.oauth.create_client(self.CLIENT_NAME)
+
+        if client is None:
             raise OAuthConfigurationError()
+
         return client
 
     @staticmethod

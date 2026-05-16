@@ -34,7 +34,6 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(120), nullable=False)
     google_id: Mapped[str | None] = mapped_column(String(255), unique=True)
-    sub: Mapped[str | None] = mapped_column(String(255), unique=True)
     phone: Mapped[str | None] = mapped_column(String(20), unique=True)
     whatsapp_enabled: Mapped[bool] = mapped_column(default=False)
     is_valid: Mapped[bool] = mapped_column(default=False)
@@ -75,6 +74,7 @@ def set_default_subscription(
 
     from ._Subscription import Subscription
     from ._Plan import Plan
+    from ._StudySettings import StudySettings
     
     plan_query = select(Plan.id).where(Plan.is_free == True).limit(1)
     plan_id = connection.execute(plan_query).scalar()
@@ -87,5 +87,8 @@ def set_default_subscription(
                 expires_at=None,
             )
         )
+        
+    connection.execute(StudySettings.__table__.insert().values(user_id=target.id))
+        
 
 event.listen(User, "after_insert", set_default_subscription)

@@ -30,9 +30,12 @@ class AuthController:
 
         self.google_oauth_service = google_oauth_service
         if google_login_interactor is None:
+            from external.container import subscription_payment_service
+
             self.google_login_interactor = GoogleLoginInteractor(
                 user_repository=user_repository,
                 password_hasher_service=password_hasher_service,
+                payment_service=subscription_payment_service,
             )
         else:
             self.google_login_interactor = google_login_interactor
@@ -58,13 +61,14 @@ class AuthController:
         token = self.google_login_interactor.execute(
             email=email,
             name=name,
-            google_id=google_id,
+            sub=google_id,
         )
         session.clear()
 
         frontend_url = os.getenv("FRONTEND_URL")
         if frontend_url:
-            response = make_response(redirect(frontend_url), 302)
+            redirect_url = f"{frontend_url}/dashboard"
+            response = make_response(redirect(redirect_url), 302)
         else:
             response = make_response(jsonify({"authenticated": True}), 200)
 

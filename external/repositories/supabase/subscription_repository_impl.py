@@ -126,6 +126,7 @@ class SubscriptionRepositoryImpl(SubscriptionRepository):
             id=subscription.id,
             user_id=subscription.user_id,
             plan_id=subscription.plan_id,
+            external_id=subscription.external_id,
             status=subscription.status,
             started_at=subscription.started_at,
             expires_at=subscription.expires_at,

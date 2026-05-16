@@ -1,12 +1,13 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 import jwt
 import pytest
 from faker import Faker
+from unittest.mock import create_autospec
 
 from core.interactor.user.google_login_interactor import GoogleLoginInteractor
 from core.interface.repository import UserRepository
-from core.interface.service import PasswordHasherService
+from core.interface.service import PasswordHasherService, PaymentService
 from core.model import UserModel
 
 fake = Faker()
@@ -15,14 +16,22 @@ fake = Faker()
 class TestGoogleLoginInteractor:
 
     @pytest.fixture
+    def payment_service_mock(self) -> PaymentService:
+        mock = create_autospec(spec=PaymentService, instance=True)
+        mock.create_customer.return_value = "test-customer-id"
+        return mock
+
+    @pytest.fixture
     def interactor(
         self,
         user_repository_mock: UserRepository,
         password_hasher_service_mock: PasswordHasherService,
+        payment_service_mock: PaymentService,
     ):
         return GoogleLoginInteractor(
             user_repository=user_repository_mock,
             password_hasher_service=password_hasher_service_mock,
+            payment_service=payment_service_mock,
         )
 
     def test_should_create_user_when_email_does_not_exist(
@@ -30,6 +39,7 @@ class TestGoogleLoginInteractor:
         interactor: GoogleLoginInteractor,
         user_repository_mock: UserRepository,
         password_hasher_service_mock: PasswordHasherService,
+        payment_service_mock: PaymentService,
         monkeypatch,
     ) -> None:
 
@@ -44,15 +54,17 @@ class TestGoogleLoginInteractor:
             name=name,
             phone=None,
             whatsapp_enabled=False,
-            created_at=datetime.now(),
-            sub=sub,
-            last_login=datetime.now(),
+            created_at=datetime.now(tz=timezone.utc),
+            google_id=sub,
+            last_login=datetime.now(tz=timezone.utc),
             study_settings=None,
             password="hashed-random-password",
             current_topic=None,
+            payment_customer_id=None,
         )
 
         user_repository_mock.get_user_by_sub.return_value = None
+        user_repository_mock.get_user_by_email.return_value = None
         password_hasher_service_mock.hash.return_value = "hashed-random-password"
         user_repository_mock.create_google_user.return_value = expected_user
 
@@ -63,8 +75,18 @@ class TestGoogleLoginInteractor:
         )
 
         user_repository_mock.get_user_by_sub.assert_called_once_with(sub=sub)
+        user_repository_mock.get_user_by_email.assert_called_once_with(email=email)
         password_hasher_service_mock.hash.assert_called_once()
         user_repository_mock.create_google_user.assert_called_once()
+        payment_service_mock.create_customer.assert_called_once_with(
+            user_id=str(expected_user.id),
+            name=name,
+            email=email,
+        )
+        user_repository_mock.update_payment_customer_id.assert_called_once_with(
+            user_id=str(expected_user.id),
+            payment_customer_id="test-customer-id",
+        )
         decoded_token = jwt.decode(token, "test-secret", algorithms=["HS256"])
         assert decoded_token["userId"] == str(expected_user.id)
 
@@ -73,6 +95,7 @@ class TestGoogleLoginInteractor:
         interactor: GoogleLoginInteractor,
         user_repository_mock: UserRepository,
         password_hasher_service_mock: PasswordHasherService,
+        payment_service_mock: PaymentService,
         monkeypatch,
     ) -> None:
 
@@ -84,12 +107,13 @@ class TestGoogleLoginInteractor:
             name="Existing User",
             phone=None,
             whatsapp_enabled=False,
-            created_at=datetime.now(),
-            sub="old-sub",
+            created_at=datetime.now(tz=timezone.utc),
+            google_id="old-sub",
             last_login=None,
             study_settings=None,
             password="hashed-password",
             current_topic=None,
+            payment_customer_id="already-on-file",
         )
         updated_user = UserModel(
             id=existing_user.id,
@@ -98,14 +122,16 @@ class TestGoogleLoginInteractor:
             phone=existing_user.phone,
             whatsapp_enabled=existing_user.whatsapp_enabled,
             created_at=existing_user.created_at,
-            sub="google-sub-456",
-            last_login=datetime.now(),
+            google_id="google-sub-456",
+            last_login=datetime.now(tz=timezone.utc),
             study_settings=None,
             password=existing_user.password,
             current_topic=None,
+            payment_customer_id="already-on-file",
         )
 
         user_repository_mock.get_user_by_sub.return_value = existing_user
+        user_repository_mock.get_user_by_email.return_value = None
         user_repository_mock.update_google_login.return_value = updated_user
 
         token = interactor.execute(
@@ -118,5 +144,6 @@ class TestGoogleLoginInteractor:
         password_hasher_service_mock.hash.assert_not_called()
         user_repository_mock.create_google_user.assert_not_called()
         user_repository_mock.update_google_login.assert_called_once()
+        payment_service_mock.create_customer.assert_not_called()
         decoded_token = jwt.decode(token, "test-secret", algorithms=["HS256"])
         assert decoded_token["userId"] == str(existing_user.id)

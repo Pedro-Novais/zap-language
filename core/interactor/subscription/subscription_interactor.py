@@ -2,11 +2,14 @@ from datetime import datetime, timezone
 
 from loguru import logger
 
-from core.interface.repository import SubscriptionRepository
+from core.interface.repository import SubscriptionRepository, UserRepository
+from core.interface.repository.plan_repository import PlanRepository
 from core.interface.service import PaymentService
 from core.shared.errors import (
     ActiveSubscriptionAlreadyExistsError,
+    ApplicationError,
     SubscriptionNotFoundError,
+    UserNotFoundError,
 )
 from .dto import SubscriptionRequestDTO, SubscriptionResponseDTO
 
@@ -15,11 +18,15 @@ class SubscriptionInteractor:
 
     def __init__(
         self,
+        plan_repository: PlanRepository,
         subscription_repository: SubscriptionRepository,
         subscription_payment_service: PaymentService,
+        user_repository: UserRepository,
     ) -> None:
+        self.plan_repository = plan_repository
         self.subscription_repository = subscription_repository
         self.subscription_payment_service = subscription_payment_service
+        self.user_repository = user_repository
 
     def get_user_subscription(
         self,
@@ -54,8 +61,37 @@ class SubscriptionInteractor:
         if current_subscription:
             raise ActiveSubscriptionAlreadyExistsError()
 
+        user = self.user_repository.get_user_by_id(user_id=subscription_request_dto.user_id)
+        if not user:
+            raise UserNotFoundError()
+
+        customer_id = user.payment_customer_id
+        if not customer_id:
+            try:
+                customer_id = self.subscription_payment_service.create_customer(
+                    user_id=str(user.id),
+                    name=user.name,
+                    email=user.email,
+                )
+                self.user_repository.update_payment_customer_id(
+                    user_id=str(user.id),
+                    payment_customer_id=customer_id,
+                )
+            except Exception as error:
+                logger.error(
+                    f"Failed to create payment customer before subscription "
+                    f"for user '{user.email}': {error}",
+                )
+                raise ApplicationError(
+                    status_code=503,
+                    message_error=(
+                        "Não foi possível preparar os dados de pagamento. "
+                        "Tente novamente em instantes."
+                    ),
+                )
+
         status, gateway, expires_at = self.subscription_payment_service.create_subscription(
-            user_id=subscription_request_dto.user_id,
+            customer_id=customer_id,
             plan_id=subscription_request_dto.plan_id,
         )
 

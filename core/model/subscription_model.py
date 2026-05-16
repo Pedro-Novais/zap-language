@@ -2,7 +2,7 @@ from uuid import UUID
 from datetime import datetime, timezone
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from core.model import PlanModel
 
@@ -13,6 +13,7 @@ class SubscriptionModel(BaseModel):
     id: UUID
     user_id: UUID
     plan_id: UUID
+    external_id: Optional[str] = Field(default=None, exclude=True)
     status: str
     started_at: datetime
     expires_at: Optional[datetime] = None
